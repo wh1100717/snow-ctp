@@ -1,7 +1,7 @@
 #include <node.h>
 #include <uv.h>
 #include "ctp_trader.h"
-// #include "wrap_mduser.h"
+#include "ctp_market.h"
 
 using namespace v8;
 
@@ -11,9 +11,9 @@ void CreateTrader(const FunctionCallbackInfo<Value>& args) {
   CTPTrader::NewInstance(args);
 }
 
-//void CreateMdUser(const FunctionCallbackInfo<Value>& args) {
-//  WrapMdUser::NewInstance(args);
-//}
+void CreateMarket(const FunctionCallbackInfo<Value>& args) {
+  CTPMarket::NewInstance(args);
+}
 
 void Settings(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
@@ -32,10 +32,10 @@ void Settings(const FunctionCallbackInfo<Value>& args) {
 void Init(Local<Object> exports) {
   Isolate* isolate = exports->GetIsolate();
   CTPTrader::Init(isolate);
-  // WrapMdUser::Init(isolate);
+  CTPMarket::Init(isolate);
 
   NODE_SET_METHOD(exports, "createTrader", CreateTrader);
-  // NODE_SET_METHOD(exports, "createMdUser", CreateMdUser);
+  NODE_SET_METHOD(exports, "CreateMarket", CreateMarket);
   NODE_SET_METHOD(exports, "settings", Settings);
 }
 

@@ -572,6 +572,11 @@ void CTPTrader::ReqOrderInsert(const FunctionCallbackInfo <Value> &args) {
   setInt(jsonObj, String::NewFromUtf8(isolate, "UserForceClose"), &req.UserForceClose);
   setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqOrderInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -628,6 +633,11 @@ void CTPTrader::ReqParkedOrderInsert(const FunctionCallbackInfo <Value> &args) {
   setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
   setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqParkedOrderInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -675,6 +685,8 @@ void CTPTrader::ReqParkedOrderAction(const FunctionCallbackInfo <Value> &args) {
   setChar(jsonObj, String::NewFromUtf8(isolate, "Status"), &req.Status);
   setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqParkedOrderAction(&req, uuid, FunRtnCallback);
   return ;
@@ -717,6 +729,8 @@ void CTPTrader::ReqOrderAction(const FunctionCallbackInfo <Value> &args) {
   setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeChange"), &req.VolumeChange);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqOrderAction(&req, uuid, FunRtnCallback);
   return ;
@@ -787,6 +801,9 @@ void CTPTrader::ReqSettlementInfoConfirm(const FunctionCallbackInfo <Value> &arg
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmDate"), req.ConfirmDate);
   setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmTime"), req.ConfirmTime);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "SettlementID"), &req.SettlementID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
   obj->uvTrader->ReqSettlementInfoConfirm(&req, uuid, FunRtnCallback);
   return ;
@@ -895,6 +912,11 @@ void CTPTrader::ReqExecOrderInsert(const FunctionCallbackInfo <Value> &args) {
   setChar(jsonObj, String::NewFromUtf8(isolate, "ReservePositionFlag"), &req.ReservePositionFlag);
   setChar(jsonObj, String::NewFromUtf8(isolate, "CloseFlag"), &req.CloseFlag);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqExecOrderInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -936,6 +958,8 @@ void CTPTrader::ReqExecOrderAction(const FunctionCallbackInfo <Value> &args) {
   setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqExecOrderAction(&req, uuid, FunRtnCallback);
   return ;
@@ -971,6 +995,8 @@ void CTPTrader::ReqForQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteRef"), req.ForQuoteRef);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqForQuoteInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -1017,6 +1043,9 @@ void CTPTrader::ReqQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   setString(jsonObj, String::NewFromUtf8(isolate, "BidOrderRef"), req.BidOrderRef);
   setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteSysID"), req.ForQuoteSysID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqQuoteInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -1058,6 +1087,9 @@ void CTPTrader::ReqQuoteAction(const FunctionCallbackInfo <Value> &args) {
   setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqQuoteAction(&req, uuid, FunRtnCallback);
   return ;
@@ -1095,6 +1127,8 @@ void CTPTrader::ReqBatchOrderAction(const FunctionCallbackInfo <Value> &args) {
   setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqBatchOrderAction(&req, uuid, FunRtnCallback);
   return ;
@@ -1124,6 +1158,21 @@ void CTPTrader::ReqOptionSelfCloseInsert(const FunctionCallbackInfo <Value> &arg
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
+  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqOptionSelfCloseInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -1153,6 +1202,20 @@ void CTPTrader::ReqOptionSelfCloseAction(const FunctionCallbackInfo <Value> &arg
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseActionRef"), &req.OptionSelfCloseActionRef);
+  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
+  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqOptionSelfCloseAction(&req, uuid, FunRtnCallback);
   return ;
@@ -1192,6 +1255,8 @@ void CTPTrader::ReqCombActionInsert(const FunctionCallbackInfo <Value> &args) {
   setChar(jsonObj, String::NewFromUtf8(isolate, "CombDirection"), &req.CombDirection);
   setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
   obj->uvTrader->ReqCombActionInsert(&req, uuid, FunRtnCallback);
   return ;
@@ -1330,6 +1395,7 @@ void CTPTrader::ReqQryTradingAccount(const FunctionCallbackInfo <Value> &args) {
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
   obj->uvTrader->ReqQryTradingAccount(&req, uuid, FunRtnCallback);
   return ;
@@ -1394,7 +1460,6 @@ void CTPTrader::ReqQryTradingCode(const FunctionCallbackInfo <Value> &args) {
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ClientIDType"), &req.ClientIDType);
 
   obj->uvTrader->ReqQryTradingCode(&req, uuid, FunRtnCallback);
   return ;
@@ -1428,6 +1493,7 @@ void CTPTrader::ReqQryInstrumentMarginRate(const FunctionCallbackInfo <Value> &a
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryInstrumentMarginRate(&req, uuid, FunRtnCallback);
   return ;
@@ -1619,6 +1685,8 @@ void CTPTrader::ReqQrySettlementInfo(const FunctionCallbackInfo <Value> &args) {
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
   obj->uvTrader->ReqQrySettlementInfo(&req, uuid, FunRtnCallback);
   return ;
@@ -1744,6 +1812,8 @@ void CTPTrader::ReqQrySettlementInfoConfirm(const FunctionCallbackInfo <Value> &
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
   obj->uvTrader->ReqQrySettlementInfoConfirm(&req, uuid, FunRtnCallback);
   return ;
@@ -1776,6 +1846,7 @@ void CTPTrader::ReqQryInvestorPositionCombineDetail(const FunctionCallbackInfo <
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "CombInstrumentID"), req.CombInstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryInvestorPositionCombineDetail(&req, uuid, FunRtnCallback);
   return ;
@@ -1873,6 +1944,7 @@ void CTPTrader::ReqQryInvestorProductGroupMargin(const FunctionCallbackInfo <Val
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ProductGroupID"), req.ProductGroupID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryInvestorProductGroupMargin(&req, uuid, FunRtnCallback);
   return ;
@@ -1905,6 +1977,7 @@ void CTPTrader::ReqQryExchangeMarginRate(const FunctionCallbackInfo <Value> &arg
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryExchangeMarginRate(&req, uuid, FunRtnCallback);
   return ;
@@ -2032,6 +2105,7 @@ void CTPTrader::ReqQryProductExchRate(const FunctionCallbackInfo <Value> &args) 
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryProductExchRate(&req, uuid, FunRtnCallback);
   return ;
@@ -2092,6 +2166,9 @@ void CTPTrader::ReqQryMMInstrumentCommissionRate(const FunctionCallbackInfo <Val
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
   obj->uvTrader->ReqQryMMInstrumentCommissionRate(&req, uuid, FunRtnCallback);
   return ;
@@ -2121,6 +2198,9 @@ void CTPTrader::ReqQryMMOptionInstrCommRate(const FunctionCallbackInfo <Value> &
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
   obj->uvTrader->ReqQryMMOptionInstrCommRate(&req, uuid, FunRtnCallback);
   return ;
@@ -2150,6 +2230,9 @@ void CTPTrader::ReqQryInstrumentOrderCommRate(const FunctionCallbackInfo <Value>
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
   obj->uvTrader->ReqQryInstrumentOrderCommRate(&req, uuid, FunRtnCallback);
   return ;
@@ -2183,6 +2266,7 @@ void CTPTrader::ReqQrySecAgentTradingAccount(const FunctionCallbackInfo <Value> 
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
   obj->uvTrader->ReqQrySecAgentTradingAccount(&req, uuid, FunRtnCallback);
   return ;
@@ -2212,6 +2296,8 @@ void CTPTrader::ReqQrySecAgentCheckMode(const FunctionCallbackInfo <Value> &args
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
   obj->uvTrader->ReqQrySecAgentCheckMode(&req, uuid, FunRtnCallback);
   return ;
@@ -2415,6 +2501,13 @@ void CTPTrader::ReqQryOptionSelfClose(const FunctionCallbackInfo <Value> &args) 
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
   obj->uvTrader->ReqQryOptionSelfClose(&req, uuid, FunRtnCallback);
   return ;
@@ -2444,6 +2537,8 @@ void CTPTrader::ReqQryInvestUnit(const FunctionCallbackInfo <Value> &args) {
   Local<Object> jsonObj = args[0]->ToObject();
   Local<Array> props = jsonObj->GetOwnPropertyNames();
 
+  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
   obj->uvTrader->ReqQryInvestUnit(&req, uuid, FunRtnCallback);
   return ;
@@ -2475,6 +2570,7 @@ void CTPTrader::ReqQryCombInstrumentGuard(const FunctionCallbackInfo <Value> &ar
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
   obj->uvTrader->ReqQryCombInstrumentGuard(&req, uuid, FunRtnCallback);
   return ;
@@ -2736,6 +2832,7 @@ void CTPTrader::ReqQryBrokerTradingParams(const FunctionCallbackInfo <Value> &ar
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
   setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
   obj->uvTrader->ReqQryBrokerTradingParams(&req, uuid, FunRtnCallback);
   return ;
@@ -4028,6 +4125,11 @@ void CTPTrader::pkg_cb_onrsporderinsert(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserForceClose"), Number::New(isolate, pInputOrder->UserForceClose));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pInputOrder->IsSwapOrder));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOrder->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4071,6 +4173,11 @@ void CTPTrader::pkg_cb_onrspparkedorderinsert(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"), Number::New(isolate, pParkedOrder->ErrorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pParkedOrder->ErrorMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pParkedOrder->IsSwapOrder));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pParkedOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pParkedOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pParkedOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pParkedOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pParkedOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4105,6 +4212,8 @@ void CTPTrader::pkg_cb_onrspparkedorderaction(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "Status"), String::NewFromUtf8(isolate, charto_string(pParkedOrderAction->Status).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"), Number::New(isolate, pParkedOrderAction->ErrorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pParkedOrderAction->ErrorMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pParkedOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pParkedOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4134,6 +4243,8 @@ void CTPTrader::pkg_cb_onrsporderaction(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeChange"), Number::New(isolate, pInputOrderAction->VolumeChange));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputOrderAction->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4178,6 +4289,9 @@ void CTPTrader::pkg_cb_onrspsettlementinfoconfirm(CbRtnField *data, Local <Value
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ConfirmDate"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->ConfirmDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ConfirmTime"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->ConfirmTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pSettlementInfoConfirm->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->CurrencyID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4247,6 +4361,11 @@ void CTPTrader::pkg_cb_onrspexecorderinsert(CbRtnField *data, Local <Value> *cbA
     jsonRtn->Set(String::NewFromUtf8(isolate, "ReservePositionFlag"), String::NewFromUtf8(isolate, charto_string(pInputExecOrder->ReservePositionFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CloseFlag"), String::NewFromUtf8(isolate, charto_string(pInputExecOrder->CloseFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputExecOrder->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputExecOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputExecOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputExecOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputExecOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputExecOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4275,6 +4394,8 @@ void CTPTrader::pkg_cb_onrspexecorderaction(CbRtnField *data, Local <Value> *cbA
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pInputExecOrderAction->ActionFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputExecOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputExecOrderAction->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputExecOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputExecOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4297,6 +4418,8 @@ void CTPTrader::pkg_cb_onrspforquoteinsert(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteRef"), String::NewFromUtf8(isolate, pInputForQuote->ForQuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputForQuote->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputForQuote->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputForQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputForQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4330,6 +4453,9 @@ void CTPTrader::pkg_cb_onrspquoteinsert(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidOrderRef"), String::NewFromUtf8(isolate, pInputQuote->BidOrderRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteSysID"), String::NewFromUtf8(isolate, pInputQuote->ForQuoteSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputQuote->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputQuote->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4358,6 +4484,9 @@ void CTPTrader::pkg_cb_onrspquoteaction(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pInputQuoteAction->ActionFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputQuoteAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputQuoteAction->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputQuoteAction->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputQuoteAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputQuoteAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4382,6 +4511,8 @@ void CTPTrader::pkg_cb_onrspbatchorderaction(CbRtnField *data, Local <Value> *cb
     jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pInputBatchOrderAction->SessionID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputBatchOrderAction->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputBatchOrderAction->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputBatchOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputBatchOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4398,6 +4529,21 @@ void CTPTrader::pkg_cb_onrspoptionselfcloseinsert(CbRtnField *data, Local <Value
   if (data->rtnField) {
     CThostFtdcInputOptionSelfCloseField *pInputOptionSelfClose = static_cast<CThostFtdcInputOptionSelfCloseField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pInputOptionSelfClose->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pInputOptionSelfClose->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pInputOptionSelfClose->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pInputOptionSelfClose->BusinessUnit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInputOptionSelfClose->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOptionSelfClose->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOptionSelfClose->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4414,6 +4560,20 @@ void CTPTrader::pkg_cb_onrspoptionselfcloseaction(CbRtnField *data, Local <Value
   if (data->rtnField) {
     CThostFtdcInputOptionSelfCloseActionField *pInputOptionSelfCloseAction = static_cast<CThostFtdcInputOptionSelfCloseActionField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseActionRef"), Number::New(isolate, pInputOptionSelfCloseAction->OptionSelfCloseActionRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pInputOptionSelfCloseAction->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrontID"), Number::New(isolate, pInputOptionSelfCloseAction->FrontID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pInputOptionSelfCloseAction->SessionID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->OptionSelfCloseSysID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pInputOptionSelfCloseAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOptionSelfCloseAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4440,6 +4600,8 @@ void CTPTrader::pkg_cb_onrspcombactioninsert(CbRtnField *data, Local <Value> *cb
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombDirection"), String::NewFromUtf8(isolate, charto_string(pInputCombAction->CombDirection).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInputCombAction->HedgeFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputCombAction->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputCombAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputCombAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4512,6 +4674,10 @@ void CTPTrader::pkg_cb_onrspqryorder(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "ZCETotalTradedVolume"), Number::New(isolate, pOrder->ZCETotalTradedVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pOrder->IsSwapOrder));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOrder->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4667,7 +4833,6 @@ void CTPTrader::pkg_cb_onrspqrytradingcode(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pTradingCode->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pTradingCode->ClientID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsActive"), Number::New(isolate, pTradingCode->IsActive));
-    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientIDType"), String::NewFromUtf8(isolate, charto_string(pTradingCode->ClientIDType).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pTradingCode->BranchID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BizType"), String::NewFromUtf8(isolate, charto_string(pTradingCode->BizType).c_str()));
     *cbArray = jsonRtn;
@@ -4692,6 +4857,7 @@ void CTPTrader::pkg_cb_onrspqryinstrumentmarginrate(CbRtnField *data, Local <Val
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInstrumentMarginRate->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInstrumentMarginRate->HedgeFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsRelative"), Number::New(isolate, pInstrumentMarginRate->IsRelative));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInstrumentMarginRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4862,6 +5028,8 @@ void CTPTrader::pkg_cb_onrspqrysettlementinfo(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pSettlementInfo->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SequenceNo"), Number::New(isolate, pSettlementInfo->SequenceNo));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Content"), String::NewFromUtf8(isolate, pSettlementInfo->Content));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pSettlementInfo->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pSettlementInfo->CurrencyID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4951,6 +5119,9 @@ void CTPTrader::pkg_cb_onrspqrysettlementinfoconfirm(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ConfirmDate"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->ConfirmDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ConfirmTime"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->ConfirmTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pSettlementInfoConfirm->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pSettlementInfoConfirm->CurrencyID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5050,6 +5221,7 @@ void CTPTrader::pkg_cb_onrspqryinvestorproductgroupmargin(CbRtnField *data, Loca
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pInvestorProductGroupMargin->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pInvestorProductGroupMargin->SettlementID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInvestorProductGroupMargin->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInvestorProductGroupMargin->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5069,6 +5241,7 @@ void CTPTrader::pkg_cb_onrspqryexchangemarginrate(CbRtnField *data, Local <Value
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pExchangeMarginRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pExchangeMarginRate->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pExchangeMarginRate->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pExchangeMarginRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5146,6 +5319,7 @@ void CTPTrader::pkg_cb_onrspqryproductexchrate(CbRtnField *data, Local <Value> *
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "ProductID"), String::NewFromUtf8(isolate, pProductExchRate->ProductID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteCurrencyID"), String::NewFromUtf8(isolate, pProductExchRate->QuoteCurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pProductExchRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5181,6 +5355,10 @@ void CTPTrader::pkg_cb_onrspqrymminstrumentcommissionrate(CbRtnField *data, Loca
   if (data->rtnField) {
     CThostFtdcMMInstrumentCommissionRateField *pMMInstrumentCommissionRate = static_cast<CThostFtdcMMInstrumentCommissionRateField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pMMInstrumentCommissionRate->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pMMInstrumentCommissionRate->InvestorRange).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pMMInstrumentCommissionRate->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pMMInstrumentCommissionRate->InvestorID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5197,6 +5375,10 @@ void CTPTrader::pkg_cb_onrspqrymmoptioninstrcommrate(CbRtnField *data, Local <Va
   if (data->rtnField) {
     CThostFtdcMMOptionInstrCommRateField *pMMOptionInstrCommRate = static_cast<CThostFtdcMMOptionInstrCommRateField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pMMOptionInstrCommRate->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pMMOptionInstrCommRate->InvestorRange).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pMMOptionInstrCommRate->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pMMOptionInstrCommRate->InvestorID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5213,6 +5395,12 @@ void CTPTrader::pkg_cb_onrspqryinstrumentordercommrate(CbRtnField *data, Local <
   if (data->rtnField) {
     CThostFtdcInstrumentOrderCommRateField *pInstrumentOrderCommRate = static_cast<CThostFtdcInstrumentOrderCommRateField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pInstrumentOrderCommRate->InvestorRange).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInstrumentOrderCommRate->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5251,6 +5439,11 @@ void CTPTrader::pkg_cb_onrspqrysecagentcheckmode(CbRtnField *data, Local <Value>
   if (data->rtnField) {
     CThostFtdcSecAgentCheckModeField *pSecAgentCheckMode = static_cast<CThostFtdcSecAgentCheckModeField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pSecAgentCheckMode->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pSecAgentCheckMode->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pSecAgentCheckMode->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerSecAgentID"), String::NewFromUtf8(isolate, pSecAgentCheckMode->BrokerSecAgentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CheckSelfAccount"), Number::New(isolate, pSecAgentCheckMode->CheckSelfAccount));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5348,6 +5541,10 @@ void CTPTrader::pkg_cb_onrspqryexecorder(CbRtnField *data, Local <Value> *cbArra
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActiveUserID"), String::NewFromUtf8(isolate, pExecOrder->ActiveUserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerExecOrderSeq"), Number::New(isolate, pExecOrder->BrokerExecOrderSeq));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pExecOrder->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pExecOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pExecOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pExecOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pExecOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5384,6 +5581,8 @@ void CTPTrader::pkg_cb_onrspqryforquote(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pForQuote->StatusMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActiveUserID"), String::NewFromUtf8(isolate, pForQuote->ActiveUserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerForQutoSeq"), Number::New(isolate, pForQuote->BrokerForQutoSeq));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pForQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pForQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5443,6 +5642,10 @@ void CTPTrader::pkg_cb_onrspqryquote(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidOrderRef"), String::NewFromUtf8(isolate, pQuote->BidOrderRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteSysID"), String::NewFromUtf8(isolate, pQuote->ForQuoteSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pQuote->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pQuote->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pQuote->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5459,6 +5662,44 @@ void CTPTrader::pkg_cb_onrspqryoptionselfclose(CbRtnField *data, Local <Value> *
   if (data->rtnField) {
     CThostFtdcOptionSelfCloseField *pOptionSelfClose = static_cast<CThostFtdcOptionSelfCloseField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pOptionSelfClose->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pOptionSelfClose->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pOptionSelfClose->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pOptionSelfClose->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pOptionSelfClose->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pOptionSelfClose->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pOptionSelfClose->BusinessUnit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseLocalID"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseLocalID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOptionSelfClose->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ParticipantID"), String::NewFromUtf8(isolate, pOptionSelfClose->ParticipantID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pOptionSelfClose->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeInstID"), String::NewFromUtf8(isolate, pOptionSelfClose->ExchangeInstID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TraderID"), String::NewFromUtf8(isolate, pOptionSelfClose->TraderID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstallID"), Number::New(isolate, pOptionSelfClose->InstallID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSubmitStatus"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->OrderSubmitStatus).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NotifySequence"), Number::New(isolate, pOptionSelfClose->NotifySequence));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pOptionSelfClose->TradingDay));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pOptionSelfClose->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseSysID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InsertDate"), String::NewFromUtf8(isolate, pOptionSelfClose->InsertDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InsertTime"), String::NewFromUtf8(isolate, pOptionSelfClose->InsertTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CancelTime"), String::NewFromUtf8(isolate, pOptionSelfClose->CancelTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExecResult"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->ExecResult).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClearingPartID"), String::NewFromUtf8(isolate, pOptionSelfClose->ClearingPartID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SequenceNo"), Number::New(isolate, pOptionSelfClose->SequenceNo));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrontID"), Number::New(isolate, pOptionSelfClose->FrontID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pOptionSelfClose->SessionID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserProductInfo"), String::NewFromUtf8(isolate, pOptionSelfClose->UserProductInfo));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pOptionSelfClose->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActiveUserID"), String::NewFromUtf8(isolate, pOptionSelfClose->ActiveUserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerOptionSelfCloseSeq"), Number::New(isolate, pOptionSelfClose->BrokerOptionSelfCloseSeq));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOptionSelfClose->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pOptionSelfClose->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pOptionSelfClose->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOptionSelfClose->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOptionSelfClose->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5475,6 +5716,14 @@ void CTPTrader::pkg_cb_onrspqryinvestunit(CbRtnField *data, Local <Value> *cbArr
   if (data->rtnField) {
     CThostFtdcInvestUnitField *pInvestUnit = static_cast<CThostFtdcInvestUnitField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInvestUnit->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInvestUnit->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorUnitName"), String::NewFromUtf8(isolate, pInvestUnit->InvestorUnitName));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorGroupID"), String::NewFromUtf8(isolate, pInvestUnit->InvestorGroupID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CommModelID"), String::NewFromUtf8(isolate, pInvestUnit->CommModelID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginModelID"), String::NewFromUtf8(isolate, pInvestUnit->MarginModelID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInvestUnit->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInvestUnit->CurrencyID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5493,6 +5742,7 @@ void CTPTrader::pkg_cb_onrspqrycombinstrumentguard(CbRtnField *data, Local <Valu
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->ExchangeID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5534,6 +5784,10 @@ void CTPTrader::pkg_cb_onrspqrycombaction(CbRtnField *data, Local <Value> *cbArr
     jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pCombAction->SessionID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserProductInfo"), String::NewFromUtf8(isolate, pCombAction->UserProductInfo));
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pCombAction->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pCombAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pCombAction->MacAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ComTradeID"), String::NewFromUtf8(isolate, pCombAction->ComTradeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pCombAction->BranchID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5680,6 +5934,10 @@ void CTPTrader::pkg_cb_onrtnorder(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "ZCETotalTradedVolume"), Number::New(isolate, pOrder->ZCETotalTradedVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pOrder->IsSwapOrder));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOrder->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5757,6 +6015,11 @@ void CTPTrader::pkg_cb_onerrrtnorderinsert(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserForceClose"), Number::New(isolate, pInputOrder->UserForceClose));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pInputOrder->IsSwapOrder));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOrder->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5796,6 +6059,8 @@ void CTPTrader::pkg_cb_onerrrtnorderaction(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pOrderAction->StatusMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pOrderAction->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOrderAction->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5831,6 +6096,12 @@ void CTPTrader::pkg_cb_onrtnbulletin(CbRtnField *data, Local <Value> *cbArray) {
   if (data->rtnField) {
     CThostFtdcBulletinField *pBulletin = static_cast<CThostFtdcBulletinField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pBulletin->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pBulletin->TradingDay));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SequenceNo"), Number::New(isolate, pBulletin->SequenceNo));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SendTime"), String::NewFromUtf8(isolate, pBulletin->SendTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Content"), String::NewFromUtf8(isolate, pBulletin->Content));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarketID"), String::NewFromUtf8(isolate, pBulletin->MarketID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5921,6 +6192,10 @@ void CTPTrader::pkg_cb_onrtnerrorconditionalorder(CbRtnField *data, Local <Value
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pErrorConditionalOrder->ErrorMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pErrorConditionalOrder->IsSwapOrder));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pErrorConditionalOrder->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pErrorConditionalOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pErrorConditionalOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pErrorConditionalOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pErrorConditionalOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5973,6 +6248,10 @@ void CTPTrader::pkg_cb_onrtnexecorder(CbRtnField *data, Local <Value> *cbArray) 
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActiveUserID"), String::NewFromUtf8(isolate, pExecOrder->ActiveUserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerExecOrderSeq"), Number::New(isolate, pExecOrder->BrokerExecOrderSeq));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pExecOrder->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pExecOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pExecOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pExecOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pExecOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6001,6 +6280,11 @@ void CTPTrader::pkg_cb_onerrrtnexecorderinsert(CbRtnField *data, Local <Value> *
     jsonRtn->Set(String::NewFromUtf8(isolate, "ReservePositionFlag"), String::NewFromUtf8(isolate, charto_string(pInputExecOrder->ReservePositionFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CloseFlag"), String::NewFromUtf8(isolate, charto_string(pInputExecOrder->CloseFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputExecOrder->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputExecOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputExecOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputExecOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputExecOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputExecOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6040,6 +6324,8 @@ void CTPTrader::pkg_cb_onerrrtnexecorderaction(CbRtnField *data, Local <Value> *
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pExecOrderAction->StatusMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pExecOrderAction->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pExecOrderAction->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pExecOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pExecOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6060,6 +6346,8 @@ void CTPTrader::pkg_cb_onerrrtnforquoteinsert(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteRef"), String::NewFromUtf8(isolate, pInputForQuote->ForQuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputForQuote->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputForQuote->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputForQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputForQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6117,6 +6405,10 @@ void CTPTrader::pkg_cb_onrtnquote(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidOrderRef"), String::NewFromUtf8(isolate, pQuote->BidOrderRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteSysID"), String::NewFromUtf8(isolate, pQuote->ForQuoteSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pQuote->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pQuote->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pQuote->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6147,6 +6439,9 @@ void CTPTrader::pkg_cb_onerrrtnquoteinsert(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidOrderRef"), String::NewFromUtf8(isolate, pInputQuote->BidOrderRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForQuoteSysID"), String::NewFromUtf8(isolate, pInputQuote->ForQuoteSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputQuote->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputQuote->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputQuote->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputQuote->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6185,6 +6480,8 @@ void CTPTrader::pkg_cb_onerrrtnquoteaction(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pQuoteAction->StatusMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pQuoteAction->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pQuoteAction->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pQuoteAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pQuoteAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6254,6 +6551,8 @@ void CTPTrader::pkg_cb_onerrrtnbatchorderaction(CbRtnField *data, Local <Value> 
     jsonRtn->Set(String::NewFromUtf8(isolate, "OrderActionStatus"), String::NewFromUtf8(isolate, charto_string(pBatchOrderAction->OrderActionStatus).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pBatchOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pBatchOrderAction->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pBatchOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pBatchOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6268,6 +6567,44 @@ void CTPTrader::pkg_cb_onrtnoptionselfclose(CbRtnField *data, Local <Value> *cbA
   if (data->rtnField) {
     CThostFtdcOptionSelfCloseField *pOptionSelfClose = static_cast<CThostFtdcOptionSelfCloseField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pOptionSelfClose->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pOptionSelfClose->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pOptionSelfClose->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pOptionSelfClose->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pOptionSelfClose->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pOptionSelfClose->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pOptionSelfClose->BusinessUnit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseLocalID"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseLocalID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOptionSelfClose->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ParticipantID"), String::NewFromUtf8(isolate, pOptionSelfClose->ParticipantID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pOptionSelfClose->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeInstID"), String::NewFromUtf8(isolate, pOptionSelfClose->ExchangeInstID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TraderID"), String::NewFromUtf8(isolate, pOptionSelfClose->TraderID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstallID"), Number::New(isolate, pOptionSelfClose->InstallID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSubmitStatus"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->OrderSubmitStatus).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NotifySequence"), Number::New(isolate, pOptionSelfClose->NotifySequence));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pOptionSelfClose->TradingDay));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pOptionSelfClose->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), String::NewFromUtf8(isolate, pOptionSelfClose->OptionSelfCloseSysID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InsertDate"), String::NewFromUtf8(isolate, pOptionSelfClose->InsertDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InsertTime"), String::NewFromUtf8(isolate, pOptionSelfClose->InsertTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CancelTime"), String::NewFromUtf8(isolate, pOptionSelfClose->CancelTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExecResult"), String::NewFromUtf8(isolate, charto_string(pOptionSelfClose->ExecResult).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClearingPartID"), String::NewFromUtf8(isolate, pOptionSelfClose->ClearingPartID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SequenceNo"), Number::New(isolate, pOptionSelfClose->SequenceNo));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrontID"), Number::New(isolate, pOptionSelfClose->FrontID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pOptionSelfClose->SessionID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserProductInfo"), String::NewFromUtf8(isolate, pOptionSelfClose->UserProductInfo));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pOptionSelfClose->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActiveUserID"), String::NewFromUtf8(isolate, pOptionSelfClose->ActiveUserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerOptionSelfCloseSeq"), Number::New(isolate, pOptionSelfClose->BrokerOptionSelfCloseSeq));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOptionSelfClose->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pOptionSelfClose->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pOptionSelfClose->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOptionSelfClose->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOptionSelfClose->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6281,6 +6618,21 @@ void CTPTrader::pkg_cb_onerrrtnoptionselfcloseinsert(CbRtnField *data, Local <Va
   if (data->rtnField) {
     CThostFtdcInputOptionSelfCloseField *pInputOptionSelfClose = static_cast<CThostFtdcInputOptionSelfCloseField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pInputOptionSelfClose->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pInputOptionSelfClose->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pInputOptionSelfClose->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pInputOptionSelfClose->BusinessUnit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInputOptionSelfClose->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pInputOptionSelfClose->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputOptionSelfClose->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputOptionSelfClose->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6295,6 +6647,32 @@ void CTPTrader::pkg_cb_onerrrtnoptionselfcloseaction(CbRtnField *data, Local <Va
   if (data->rtnField) {
     CThostFtdcOptionSelfCloseActionField *pOptionSelfCloseAction = static_cast<CThostFtdcOptionSelfCloseActionField *>(data->rtnField);
     Local <Object> jsonRtn = Object::New(isolate);
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->BrokerID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseActionRef"), Number::New(isolate, pOptionSelfCloseAction->OptionSelfCloseActionRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseRef"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->OptionSelfCloseRef));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pOptionSelfCloseAction->RequestID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrontID"), Number::New(isolate, pOptionSelfCloseAction->FrontID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pOptionSelfCloseAction->SessionID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->OptionSelfCloseSysID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pOptionSelfCloseAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActionDate"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ActionDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActionTime"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ActionTime));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TraderID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->TraderID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstallID"), Number::New(isolate, pOptionSelfCloseAction->InstallID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OptionSelfCloseLocalID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->OptionSelfCloseLocalID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ActionLocalID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ActionLocalID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ParticipantID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ParticipantID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->BusinessUnit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OrderActionStatus"), String::NewFromUtf8(isolate, charto_string(pOptionSelfCloseAction->OrderActionStatus).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->BranchID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pOptionSelfCloseAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6334,6 +6712,10 @@ void CTPTrader::pkg_cb_onrtncombaction(CbRtnField *data, Local <Value> *cbArray)
     jsonRtn->Set(String::NewFromUtf8(isolate, "SessionID"), Number::New(isolate, pCombAction->SessionID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserProductInfo"), String::NewFromUtf8(isolate, pCombAction->UserProductInfo));
     jsonRtn->Set(String::NewFromUtf8(isolate, "StatusMsg"), String::NewFromUtf8(isolate, pCombAction->StatusMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pCombAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pCombAction->MacAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ComTradeID"), String::NewFromUtf8(isolate, pCombAction->ComTradeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BranchID"), String::NewFromUtf8(isolate, pCombAction->BranchID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6357,6 +6739,8 @@ void CTPTrader::pkg_cb_onerrrtncombactioninsert(CbRtnField *data, Local <Value> 
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombDirection"), String::NewFromUtf8(isolate, charto_string(pInputCombAction->CombDirection).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInputCombAction->HedgeFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputCombAction->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pInputCombAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pInputCombAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6418,6 +6802,11 @@ void CTPTrader::pkg_cb_onrspqryparkedorder(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"), Number::New(isolate, pParkedOrder->ErrorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pParkedOrder->ErrorMsg));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsSwapOrder"), Number::New(isolate, pParkedOrder->IsSwapOrder));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pParkedOrder->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pParkedOrder->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClientID"), String::NewFromUtf8(isolate, pParkedOrder->ClientID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pParkedOrder->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pParkedOrder->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6452,6 +6841,8 @@ void CTPTrader::pkg_cb_onrspqryparkedorderaction(CbRtnField *data, Local <Value>
     jsonRtn->Set(String::NewFromUtf8(isolate, "Status"), String::NewFromUtf8(isolate, charto_string(pParkedOrderAction->Status).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"), Number::New(isolate, pParkedOrderAction->ErrorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pParkedOrderAction->ErrorMsg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "IPAddress"), String::NewFromUtf8(isolate, pParkedOrderAction->IPAddress));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MacAddress"), String::NewFromUtf8(isolate, pParkedOrderAction->MacAddress));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -6499,6 +6890,7 @@ void CTPTrader::pkg_cb_onrspqrybrokertradingparams(CbRtnField *data, Local <Valu
     jsonRtn->Set(String::NewFromUtf8(isolate, "AvailIncludeCloseProfit"), String::NewFromUtf8(isolate, charto_string(pBrokerTradingParams->AvailIncludeCloseProfit).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pBrokerTradingParams->CurrencyID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OptionRoyaltyPriceType"), String::NewFromUtf8(isolate, charto_string(pBrokerTradingParams->OptionRoyaltyPriceType).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pBrokerTradingParams->AccountID));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
