@@ -357,7 +357,6 @@ void CTPTrader::{$func_name}(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
 {$set_req}
   obj->uvTrader->{$func_name}(&req, uuid, FunRtnCallback);

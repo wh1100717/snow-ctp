@@ -378,7 +378,6 @@ void CTPTrader::ReqAuthenticate(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
@@ -411,7 +410,6 @@ void CTPTrader::ReqUserLogin(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
@@ -450,7 +448,6 @@ void CTPTrader::ReqUserLogout(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
@@ -481,7 +478,6 @@ void CTPTrader::ReqUserPasswordUpdate(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
@@ -514,7 +510,6 @@ void CTPTrader::ReqTradingAccountPasswordUpdate(const FunctionCallbackInfo <Valu
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
@@ -548,7 +543,6 @@ void CTPTrader::ReqOrderInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -604,7 +598,6 @@ void CTPTrader::ReqParkedOrderInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -665,7 +658,6 @@ void CTPTrader::ReqParkedOrderAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -714,7 +706,6 @@ void CTPTrader::ReqOrderAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -758,7 +749,6 @@ void CTPTrader::ReqQueryMaxOrderVolume(const FunctionCallbackInfo <Value> &args)
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -795,7 +785,6 @@ void CTPTrader::ReqSettlementInfoConfirm(const FunctionCallbackInfo <Value> &arg
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -831,7 +820,6 @@ void CTPTrader::ReqRemoveParkedOrder(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -863,7 +851,6 @@ void CTPTrader::ReqRemoveParkedOrderAction(const FunctionCallbackInfo <Value> &a
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -895,7 +882,6 @@ void CTPTrader::ReqExecOrderInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -944,7 +930,6 @@ void CTPTrader::ReqExecOrderAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -987,7 +972,6 @@ void CTPTrader::ReqForQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1024,7 +1008,6 @@ void CTPTrader::ReqQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1073,7 +1056,6 @@ void CTPTrader::ReqQuoteAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1117,7 +1099,6 @@ void CTPTrader::ReqBatchOrderAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1156,7 +1137,6 @@ void CTPTrader::ReqOptionSelfCloseInsert(const FunctionCallbackInfo <Value> &arg
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1200,7 +1180,6 @@ void CTPTrader::ReqOptionSelfCloseAction(const FunctionCallbackInfo <Value> &arg
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1243,7 +1222,6 @@ void CTPTrader::ReqCombActionInsert(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1284,7 +1262,6 @@ void CTPTrader::ReqQryOrder(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1320,7 +1297,6 @@ void CTPTrader::ReqQryTrade(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1356,7 +1332,6 @@ void CTPTrader::ReqQryInvestorPosition(const FunctionCallbackInfo <Value> &args)
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1389,7 +1364,6 @@ void CTPTrader::ReqQryTradingAccount(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1423,7 +1397,6 @@ void CTPTrader::ReqQryInvestor(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1454,7 +1427,6 @@ void CTPTrader::ReqQryTradingCode(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1487,7 +1459,6 @@ void CTPTrader::ReqQryInstrumentMarginRate(const FunctionCallbackInfo <Value> &a
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1521,7 +1492,6 @@ void CTPTrader::ReqQryInstrumentCommissionRate(const FunctionCallbackInfo <Value
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1554,7 +1524,6 @@ void CTPTrader::ReqQryExchange(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
@@ -1584,7 +1553,6 @@ void CTPTrader::ReqQryProduct(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
   setChar(jsonObj, String::NewFromUtf8(isolate, "ProductClass"), &req.ProductClass);
@@ -1616,7 +1584,6 @@ void CTPTrader::ReqQryInstrument(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
@@ -1649,7 +1616,6 @@ void CTPTrader::ReqQryDepthMarketData(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
@@ -1680,7 +1646,6 @@ void CTPTrader::ReqQrySettlementInfo(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1714,7 +1679,6 @@ void CTPTrader::ReqQryTransferBank(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
   setString(jsonObj, String::NewFromUtf8(isolate, "BankBrchID"), req.BankBrchID);
@@ -1745,7 +1709,6 @@ void CTPTrader::ReqQryInvestorPositionDetail(const FunctionCallbackInfo <Value> 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1778,7 +1741,6 @@ void CTPTrader::ReqQryNotice(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
 
@@ -1808,7 +1770,6 @@ void CTPTrader::ReqQrySettlementInfoConfirm(const FunctionCallbackInfo <Value> &
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1841,7 +1802,6 @@ void CTPTrader::ReqQryInvestorPositionCombineDetail(const FunctionCallbackInfo <
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1874,7 +1834,6 @@ void CTPTrader::ReqQryCFMMCTradingAccountKey(const FunctionCallbackInfo <Value> 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1905,7 +1864,6 @@ void CTPTrader::ReqQryEWarrantOffset(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1938,7 +1896,6 @@ void CTPTrader::ReqQryInvestorProductGroupMargin(const FunctionCallbackInfo <Val
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -1972,7 +1929,6 @@ void CTPTrader::ReqQryExchangeMarginRate(const FunctionCallbackInfo <Value> &arg
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
@@ -2005,7 +1961,6 @@ void CTPTrader::ReqQryExchangeMarginRateAdjust(const FunctionCallbackInfo <Value
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
@@ -2037,7 +1992,6 @@ void CTPTrader::ReqQryExchangeRate(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "FromCurrencyID"), req.FromCurrencyID);
@@ -2069,7 +2023,6 @@ void CTPTrader::ReqQrySecAgentACIDMap(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
@@ -2102,7 +2055,6 @@ void CTPTrader::ReqQryProductExchRate(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
@@ -2133,7 +2085,6 @@ void CTPTrader::ReqQryProductGroup(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
@@ -2164,7 +2115,6 @@ void CTPTrader::ReqQryMMInstrumentCommissionRate(const FunctionCallbackInfo <Val
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2196,7 +2146,6 @@ void CTPTrader::ReqQryMMOptionInstrCommRate(const FunctionCallbackInfo <Value> &
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2228,7 +2177,6 @@ void CTPTrader::ReqQryInstrumentOrderCommRate(const FunctionCallbackInfo <Value>
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2260,7 +2208,6 @@ void CTPTrader::ReqQrySecAgentTradingAccount(const FunctionCallbackInfo <Value> 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2294,7 +2241,6 @@ void CTPTrader::ReqQrySecAgentCheckMode(const FunctionCallbackInfo <Value> &args
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2325,7 +2271,6 @@ void CTPTrader::ReqQryOptionInstrTradeCost(const FunctionCallbackInfo <Value> &a
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2359,7 +2304,6 @@ void CTPTrader::ReqQryOptionInstrCommRate(const FunctionCallbackInfo <Value> &ar
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2392,7 +2336,6 @@ void CTPTrader::ReqQryExecOrder(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2428,7 +2371,6 @@ void CTPTrader::ReqQryForQuote(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2463,7 +2405,6 @@ void CTPTrader::ReqQryQuote(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2499,7 +2440,6 @@ void CTPTrader::ReqQryOptionSelfClose(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2535,7 +2475,6 @@ void CTPTrader::ReqQryInvestUnit(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2566,7 +2505,6 @@ void CTPTrader::ReqQryCombInstrumentGuard(const FunctionCallbackInfo <Value> &ar
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
@@ -2598,7 +2536,6 @@ void CTPTrader::ReqQryCombAction(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2631,7 +2568,6 @@ void CTPTrader::ReqQryTransferSerial(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
@@ -2664,7 +2600,6 @@ void CTPTrader::ReqQryAccountregister(const FunctionCallbackInfo <Value> &args) 
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
@@ -2698,7 +2633,6 @@ void CTPTrader::ReqQryContractBank(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
@@ -2730,7 +2664,6 @@ void CTPTrader::ReqQryParkedOrder(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2763,7 +2696,6 @@ void CTPTrader::ReqQryParkedOrderAction(const FunctionCallbackInfo <Value> &args
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2796,7 +2728,6 @@ void CTPTrader::ReqQryTradingNotice(const FunctionCallbackInfo <Value> &args) {
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2827,7 +2758,6 @@ void CTPTrader::ReqQryBrokerTradingParams(const FunctionCallbackInfo <Value> &ar
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2860,7 +2790,6 @@ void CTPTrader::ReqQryBrokerTradingAlgos(const FunctionCallbackInfo <Value> &arg
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
@@ -2892,7 +2821,6 @@ void CTPTrader::ReqQueryCFMMCTradingAccountToken(const FunctionCallbackInfo <Val
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
   setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
@@ -2923,7 +2851,6 @@ void CTPTrader::ReqFromBankToFutureByFuture(const FunctionCallbackInfo <Value> &
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
   setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
@@ -2991,7 +2918,6 @@ void CTPTrader::ReqFromFutureToBankByFuture(const FunctionCallbackInfo <Value> &
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
   setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
@@ -3059,7 +2985,6 @@ void CTPTrader::ReqQueryBankAccountMoneyByFuture(const FunctionCallbackInfo <Val
   memset(&req, 0, sizeof(req));
 
   Local<Object> jsonObj = args[0]->ToObject();
-  Local<Array> props = jsonObj->GetOwnPropertyNames();
 
   setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
   setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
