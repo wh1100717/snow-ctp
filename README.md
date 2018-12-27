@@ -1,2 +1,4 @@
-# snow-ctp
-Node CTP Wrapper
+snow-ctp
+===============
+
+nodejs ctp wrapper
