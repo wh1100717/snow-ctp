@@ -61,16 +61,13 @@ std::map<int, Persistent<Function> > CTPTrader::callback_map;
 std::map<int, Persistent<Function> > CTPTrader::fun_rtncb_map;
 
 CTPTrader::CTPTrader(void) {
-  logger_cout("ctp_trader------>object start init");
   uvTrader = new uv_trader();
-  logger_cout("ctp_trader------>object init successed");
 }
 
 CTPTrader::~CTPTrader(void) {
   if (uvTrader) {
     delete uvTrader;
   }
-  logger_cout("ctp_trader------>object destroyed");
 }
 
 void CTPTrader::New(const FunctionCallbackInfo <Value> &args) {
@@ -125,8 +122,6 @@ void CTPTrader::GetTradingDay(const FunctionCallbackInfo <Value> &args) {
 
   CTPTrader *wTrader = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
   const char *tradingDay = wTrader->uvTrader->GetTradingDay();
-  logger_cout("GetTradingDay:");
-  logger_cout(tradingDay);
 
   args.GetReturnValue().Set(String::NewFromUtf8(isolate, tradingDay));
 }
@@ -135,9 +130,9 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   if (args[0]->IsUndefined() || args[1]->IsUndefined()) {
-    logger_cout("Wrong arguments->event name or function");
+    logger_cout("[TRADER] Wrong arguments->event name or function");
     isolate->ThrowException(
-            Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->event name or function")));
+            Exception::TypeError(String::NewFromUtf8(isolate, "[TRADER] Wrong arguments->event name or function")));
     return;
   }
 
@@ -150,7 +145,7 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
 
   std::map<std::string, int>::iterator eIt = event_map.find((std::string) * eNameAscii);
   if (eIt == event_map.end()) {
-    logger_cout("System has not register this event");
+    logger_cout("[TRADER] System has not register this event");
     isolate->ThrowException(
             Exception::TypeError(String::NewFromUtf8(isolate, "System has no register this event")));
     return;
@@ -159,7 +154,7 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
   std::map < int, Persistent < Function > > ::iterator
   cIt = callback_map.find(eIt->second);
   if (cIt != callback_map.end()) {
-    logger_cout("Callback is defined before");
+    logger_cout("[TRADER] Callback is defined before");
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Callback is defined before")));
     return;
   }
@@ -173,12 +168,12 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   if (args[0]->IsUndefined()) {
-    logger_cout("Wrong arguments->front addr");
+    logger_cout("[TRADER] Wrong arguments->front addr");
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->front addr")));
     return;
   }
   if (!args[2]->IsNumber() || !args[3]->IsNumber()) {
-    logger_cout("Wrong arguments->public or private topic type");
+    logger_cout("[TRADER] Wrong arguments->public or private topic type");
     isolate->ThrowException(
             Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->public or private topic type")));
     return;
@@ -188,7 +183,6 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   if (!args[4]->IsUndefined() && args[4]->IsFunction()) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[4]));
-    logger_cout(to_string(uuid).append("|uuid").c_str());
   }
 
   Local <String> frontAddr = args[0]->ToString();
@@ -204,10 +198,6 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   strcpy(pConnectField.szPath, ((std::string) * pathUtf8).c_str());
   pConnectField.public_topic_type = publicTopicType;
   pConnectField.private_topic_type = privateTopicType;
-  logger_cout(((std::string) * addrUtf8).append("|addrUtf8").c_str());
-  logger_cout(((std::string) * pathUtf8).append("|pathUtf8").c_str());
-  logger_cout(to_string(publicTopicType).append("|publicTopicType").c_str());
-  logger_cout(to_string(privateTopicType).append("|privateTopicType").c_str());
 
   obj->uvTrader->Connect(&pConnectField, uuid, FunRtnCallback);
   return args.GetReturnValue().Set(String::NewFromUtf8(isolate, "finish exec connect"));
@@ -228,7 +218,7 @@ void CTPTrader::Disposed(const FunctionCallbackInfo <Value> &args) {
   fun_rtncb_map.clear();
   delete obj->uvTrader;
   obj->uvTrader = NULL;
-  logger_cout("wrap_trader Disposed------>wrap disposed");
+  logger_cout("[Trader Disposed]");
   return ;
 }
 
@@ -337,30 +327,30 @@ const gen_c = (reqFuncs, resFuncs, base_file_dir) => {
   const tpl_rpl_3 = `
 void CTPTrader::{$func_name}(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader {$func_name}------>";
+  std::string log = "[TRADER] {$func_name}------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  {$CTHostFtdcFieldType} req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->{$func_name}(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
-
-  {$CTHostFtdcFieldType} req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
 {$set_req}
-  obj->uvTrader->{$func_name}(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->{$func_name}(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 `
   for (const reqFunc of reqFuncs) {
@@ -371,17 +361,14 @@ void CTPTrader::{$func_name}(const FunctionCallbackInfo <Value> &args) {
     const CTHostFtdcFieldType = CTHostFtdcField.split(' ')[0]
     for (const field_key in ctp_field[CTHostFtdcFieldType]) {
       const field_type = ctp_field[CTHostFtdcFieldType][field_key]
-      if (field_key === 'TThostFtdcBrokerIDType') {
-        console.log(field_type, field_key)
-      }
       if (field_type === 'int') {
-        rpl_3_1 += `  setInt(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
-      } else if (field_type === 'double') {
-        rpl_3_1 += `  setDouble(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
+        rpl_3_1 += `    setInt(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
+      } else if (field_type === 'float') {
+        rpl_3_1 += `    setDouble(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
       } else if (field_type === 'char') {
-        rpl_3_1 += `  setChar(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
+        rpl_3_1 += `    setChar(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), &req.${field_key});\n`
       } else if (field_type === 'string') {
-        rpl_3_1 += `  setString(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), req.${field_key});\n`
+        rpl_3_1 += `    setString(jsonObj, String::NewFromUtf8(isolate, "${field_key}"), req.${field_key});\n`
       }
     }
     rpl_3 += tpl_rpl_3.replace('{$CTHostFtdcFieldType}', CTHostFtdcFieldType).replace('{$set_req}', rpl_3_1).split('{$func_name}').join(func_name)
@@ -421,7 +408,7 @@ void CTPTrader::pkg_cb_${func_name.toLowerCase()}(CbRtnField *data, Local <Value
       const field_type = ctp_field[CTHostFtdcFieldType][field_key]
       if (field_type === 'int') {
         set_res += `    jsonRtn->Set(String::NewFromUtf8(isolate, "${field_key}"), Number::New(isolate, ${CTHostFtdcFieldValue}->${field_key}));\n`
-      } else if (field_type === 'double') {
+      } else if (field_type === 'float') {
         set_res += `    jsonRtn->Set(String::NewFromUtf8(isolate, "${field_key}"), Number::New(isolate, ${CTHostFtdcFieldValue}->${field_key}));\n`
       } else if (field_type === 'char') {
         set_res += `    jsonRtn->Set(String::NewFromUtf8(isolate, "${field_key}"), String::NewFromUtf8(isolate, charto_string(${CTHostFtdcFieldValue}->${field_key}).c_str()));\n`

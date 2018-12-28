@@ -6,7 +6,7 @@ std::map<int, CbWrap*> uv_trader::cb_map;
 uv_trader::uv_trader(void) {
   iRequestID = 0;
   uv_async_init(uv_default_loop(),&async_t,NULL);
-  logger_cout("uv_trader init");
+  logger_cout("[UV:Init]");
 }
 
 uv_trader::~uv_trader(void) {
@@ -18,24 +18,24 @@ const char* uv_trader::GetTradingDay(){
 }
 
 int uv_trader::On(const char* eName,int cb_type, void(*callback)(CbRtnField* cbResult)) {
-  std::string log = "uv_trader On------>";
+  std::string log = "[UV:Register]";
   std::map<int, CbWrap*>::iterator it = cb_map.find(cb_type);
   if (it != cb_map.end()) {
-    logger_cout(log.append(" event id").append(to_string(cb_type)).append(" register repeat").c_str());
+    logger_cout(log.append(" EventID: ").append(to_string(cb_type)).append(" register repeat").c_str());
     return 1;
   }
 
   CbWrap* cb_wrap = new CbWrap();
   cb_wrap->callback = callback;
   cb_map[cb_type] = cb_wrap;
-  logger_cout(log.append(" Event:").append(eName).append(" ID:").append(to_string(cb_type)).append(" register").c_str());
+  logger_cout(log.append(" Event:").append(eName).append(" with ID:").append(to_string(cb_type)).c_str());
   return 0;
 }
 
 void uv_trader::Connect(UVConnectField* pConnectField, int uuid, void(*callback)(int, void*)) {
   UVConnectField* _pConnectField = new UVConnectField();
   memcpy(_pConnectField, pConnectField, sizeof(UVConnectField));
-  logger_cout("trader Connect this -> invoke");
+  logger_cout("[UV:Connect]");
   this->invoke(_pConnectField, T_CONNECT, callback, uuid);
 }
 void uv_trader::Disconnect() {
@@ -48,7 +48,7 @@ void uv_trader::Disconnect() {
     delete callback_it->second;
     callback_it++;
   }
-  logger_cout("uv_trader Disconnect------>object destroyed");
+  logger_cout("[UV:Disconnect]");
 }
 void uv_trader::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   CThostFtdcRspInfoField* _pRspInfo = NULL;
@@ -56,7 +56,7 @@ void uv_trader::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, boo
     _pRspInfo = new CThostFtdcRspInfoField();
     memcpy(_pRspInfo, pRspInfo, sizeof(CThostFtdcRspInfoField));
   }
-  std::string log = "uv_trader OnRspError------>";
+  std::string log = "[UV:OnRspError]";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   on_invoke(T_ONRSPERROR, _pRspInfo, pRspInfo, nRequestID, bIsLast);
 }
@@ -73,9 +73,6 @@ void uv_trader::_on_async(uv_work_t * work){
 }
 
 void uv_trader::_on_completed(uv_work_t * work,int){
-  std::string head = "uv_trader _on_completed  ==== ";
-  logger_cout(head.c_str());
-
   CbRtnField* cbTrnField = static_cast<CbRtnField*>(work->data);
   std::map<int, CbWrap*>::iterator it = cb_map.find(cbTrnField->eFlag);
   if (it != cb_map.end()) {
@@ -99,7 +96,7 @@ void uv_trader::invoke(void* field, int ret, void(*callback)(int, void*), int uu
 
   iRequestID = iRequestID+1;
   baton->iRequestID = iRequestID;
-  std::string head = "uv_trader invoke------>uuid:";
+  std::string head = "[UV:invoke]uuid:";
   logger_cout(head.append(to_string(uuid)).append(",requestid:").append(to_string(baton->iRequestID)).c_str());
   uv_queue_work(uv_default_loop(), &baton->work, _async, _completed);
 }
@@ -122,7 +119,7 @@ void uv_trader::on_invoke(int event_type, void* _stru, CThostFtdcRspInfoField *p
 void uv_trader::_async(uv_work_t * work) {
   LookupCtpApiBaton* baton = static_cast<LookupCtpApiBaton*>(work->data);
   uv_trader* uv_trader_obj = static_cast<uv_trader*>(baton->uv_trader_obj);
-  std::string log = "uv_trader _async------>";
+  std::string log = "[UV:Async]";
   logger_cout(log.append(to_string(baton->fun)).c_str());
   switch (baton->fun) {
   case T_CONNECT:
@@ -1197,7 +1194,7 @@ void uv_trader::ReqQueryBankAccountMoneyByFuture(CThostFtdcReqQueryAccountField 
 }
 void uv_trader::OnFrontConnected() {
 
-  logger_cout("uv_trader OnFrontConnected");
+  logger_cout("[UV] OnFrontConnected: ");
   CbRtnField* field = new CbRtnField();
   field->eFlag = T_ONFRONTCONNECTED;
   field->work.data = field;
@@ -1206,7 +1203,7 @@ void uv_trader::OnFrontConnected() {
 
 void uv_trader::OnFrontDisconnected(int nReason) {
 
-  std::string log = "uv_trader OnFrontDisconnected------>";
+  std::string log = "[UV] OnFrontDisconnected: ";
   logger_cout(log.append("nReason:").append(to_string(nReason)).c_str());
   CbRtnField* field = new CbRtnField();
   field->eFlag = T_ONFRONTDISCONNECTED;
@@ -1217,7 +1214,7 @@ void uv_trader::OnFrontDisconnected(int nReason) {
 
 void uv_trader::OnHeartBeatWarning(int nTimeLapse) {
 
-  std::string log = "uv_trader OnHeartBeatWarning------>";
+  std::string log = "[UV] OnHeartBeatWarning: ";
   logger_cout(log.append("nTimeLapse:").append(to_string(nTimeLapse)).c_str());
   CbRtnField* field = new CbRtnField();
   field->eFlag = T_ONHEARTBEATWARNING;
@@ -1227,7 +1224,7 @@ void uv_trader::OnHeartBeatWarning(int nTimeLapse) {
 }
 
 void uv_trader::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspAuthenticate------>";
+  std::string log = "[UV] OnRspAuthenticate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcRspAuthenticateField* _pRspAuthenticateField = NULL;
   if (pRspAuthenticateField) {
@@ -1238,7 +1235,7 @@ void uv_trader::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentica
 }
 
 void uv_trader::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspUserLogin------>";
+  std::string log = "[UV] OnRspUserLogin------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcRspUserLoginField* _pRspUserLogin = NULL;
   if (pRspUserLogin) {
@@ -1249,7 +1246,7 @@ void uv_trader::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
 }
 
 void uv_trader::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspUserLogout------>";
+  std::string log = "[UV] OnRspUserLogout------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcUserLogoutField* _pUserLogout = NULL;
   if (pUserLogout) {
@@ -1260,7 +1257,7 @@ void uv_trader::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFt
 }
 
 void uv_trader::OnRspUserPasswordUpdate(CThostFtdcUserPasswordUpdateField *pUserPasswordUpdate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspUserPasswordUpdate------>";
+  std::string log = "[UV] OnRspUserPasswordUpdate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcUserPasswordUpdateField* _pUserPasswordUpdate = NULL;
   if (pUserPasswordUpdate) {
@@ -1271,7 +1268,7 @@ void uv_trader::OnRspUserPasswordUpdate(CThostFtdcUserPasswordUpdateField *pUser
 }
 
 void uv_trader::OnRspTradingAccountPasswordUpdate(CThostFtdcTradingAccountPasswordUpdateField *pTradingAccountPasswordUpdate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspTradingAccountPasswordUpdate------>";
+  std::string log = "[UV] OnRspTradingAccountPasswordUpdate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradingAccountPasswordUpdateField* _pTradingAccountPasswordUpdate = NULL;
   if (pTradingAccountPasswordUpdate) {
@@ -1282,7 +1279,7 @@ void uv_trader::OnRspTradingAccountPasswordUpdate(CThostFtdcTradingAccountPasswo
 }
 
 void uv_trader::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspOrderInsert------>";
+  std::string log = "[UV] OnRspOrderInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputOrderField* _pInputOrder = NULL;
   if (pInputOrder) {
@@ -1293,7 +1290,7 @@ void uv_trader::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
 }
 
 void uv_trader::OnRspParkedOrderInsert(CThostFtdcParkedOrderField *pParkedOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspParkedOrderInsert------>";
+  std::string log = "[UV] OnRspParkedOrderInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcParkedOrderField* _pParkedOrder = NULL;
   if (pParkedOrder) {
@@ -1304,7 +1301,7 @@ void uv_trader::OnRspParkedOrderInsert(CThostFtdcParkedOrderField *pParkedOrder,
 }
 
 void uv_trader::OnRspParkedOrderAction(CThostFtdcParkedOrderActionField *pParkedOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspParkedOrderAction------>";
+  std::string log = "[UV] OnRspParkedOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcParkedOrderActionField* _pParkedOrderAction = NULL;
   if (pParkedOrderAction) {
@@ -1315,7 +1312,7 @@ void uv_trader::OnRspParkedOrderAction(CThostFtdcParkedOrderActionField *pParked
 }
 
 void uv_trader::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspOrderAction------>";
+  std::string log = "[UV] OnRspOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputOrderActionField* _pInputOrderAction = NULL;
   if (pInputOrderAction) {
@@ -1326,7 +1323,7 @@ void uv_trader::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
 }
 
 void uv_trader::OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField *pQueryMaxOrderVolume, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQueryMaxOrderVolume------>";
+  std::string log = "[UV] OnRspQueryMaxOrderVolume------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcQueryMaxOrderVolumeField* _pQueryMaxOrderVolume = NULL;
   if (pQueryMaxOrderVolume) {
@@ -1337,7 +1334,7 @@ void uv_trader::OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField *pQu
 }
 
 void uv_trader::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspSettlementInfoConfirm------>";
+  std::string log = "[UV] OnRspSettlementInfoConfirm------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcSettlementInfoConfirmField* _pSettlementInfoConfirm = NULL;
   if (pSettlementInfoConfirm) {
@@ -1348,7 +1345,7 @@ void uv_trader::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
 }
 
 void uv_trader::OnRspRemoveParkedOrder(CThostFtdcRemoveParkedOrderField *pRemoveParkedOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspRemoveParkedOrder------>";
+  std::string log = "[UV] OnRspRemoveParkedOrder------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcRemoveParkedOrderField* _pRemoveParkedOrder = NULL;
   if (pRemoveParkedOrder) {
@@ -1359,7 +1356,7 @@ void uv_trader::OnRspRemoveParkedOrder(CThostFtdcRemoveParkedOrderField *pRemove
 }
 
 void uv_trader::OnRspRemoveParkedOrderAction(CThostFtdcRemoveParkedOrderActionField *pRemoveParkedOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspRemoveParkedOrderAction------>";
+  std::string log = "[UV] OnRspRemoveParkedOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcRemoveParkedOrderActionField* _pRemoveParkedOrderAction = NULL;
   if (pRemoveParkedOrderAction) {
@@ -1370,7 +1367,7 @@ void uv_trader::OnRspRemoveParkedOrderAction(CThostFtdcRemoveParkedOrderActionFi
 }
 
 void uv_trader::OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspExecOrderInsert------>";
+  std::string log = "[UV] OnRspExecOrderInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputExecOrderField* _pInputExecOrder = NULL;
   if (pInputExecOrder) {
@@ -1381,7 +1378,7 @@ void uv_trader::OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOr
 }
 
 void uv_trader::OnRspExecOrderAction(CThostFtdcInputExecOrderActionField *pInputExecOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspExecOrderAction------>";
+  std::string log = "[UV] OnRspExecOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputExecOrderActionField* _pInputExecOrderAction = NULL;
   if (pInputExecOrderAction) {
@@ -1392,7 +1389,7 @@ void uv_trader::OnRspExecOrderAction(CThostFtdcInputExecOrderActionField *pInput
 }
 
 void uv_trader::OnRspForQuoteInsert(CThostFtdcInputForQuoteField *pInputForQuote, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspForQuoteInsert------>";
+  std::string log = "[UV] OnRspForQuoteInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputForQuoteField* _pInputForQuote = NULL;
   if (pInputForQuote) {
@@ -1403,7 +1400,7 @@ void uv_trader::OnRspForQuoteInsert(CThostFtdcInputForQuoteField *pInputForQuote
 }
 
 void uv_trader::OnRspQuoteInsert(CThostFtdcInputQuoteField *pInputQuote, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQuoteInsert------>";
+  std::string log = "[UV] OnRspQuoteInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputQuoteField* _pInputQuote = NULL;
   if (pInputQuote) {
@@ -1414,7 +1411,7 @@ void uv_trader::OnRspQuoteInsert(CThostFtdcInputQuoteField *pInputQuote, CThostF
 }
 
 void uv_trader::OnRspQuoteAction(CThostFtdcInputQuoteActionField *pInputQuoteAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQuoteAction------>";
+  std::string log = "[UV] OnRspQuoteAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputQuoteActionField* _pInputQuoteAction = NULL;
   if (pInputQuoteAction) {
@@ -1425,7 +1422,7 @@ void uv_trader::OnRspQuoteAction(CThostFtdcInputQuoteActionField *pInputQuoteAct
 }
 
 void uv_trader::OnRspBatchOrderAction(CThostFtdcInputBatchOrderActionField *pInputBatchOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspBatchOrderAction------>";
+  std::string log = "[UV] OnRspBatchOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputBatchOrderActionField* _pInputBatchOrderAction = NULL;
   if (pInputBatchOrderAction) {
@@ -1436,7 +1433,7 @@ void uv_trader::OnRspBatchOrderAction(CThostFtdcInputBatchOrderActionField *pInp
 }
 
 void uv_trader::OnRspOptionSelfCloseInsert(CThostFtdcInputOptionSelfCloseField *pInputOptionSelfClose, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspOptionSelfCloseInsert------>";
+  std::string log = "[UV] OnRspOptionSelfCloseInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputOptionSelfCloseField* _pInputOptionSelfClose = NULL;
   if (pInputOptionSelfClose) {
@@ -1447,7 +1444,7 @@ void uv_trader::OnRspOptionSelfCloseInsert(CThostFtdcInputOptionSelfCloseField *
 }
 
 void uv_trader::OnRspOptionSelfCloseAction(CThostFtdcInputOptionSelfCloseActionField *pInputOptionSelfCloseAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspOptionSelfCloseAction------>";
+  std::string log = "[UV] OnRspOptionSelfCloseAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputOptionSelfCloseActionField* _pInputOptionSelfCloseAction = NULL;
   if (pInputOptionSelfCloseAction) {
@@ -1458,7 +1455,7 @@ void uv_trader::OnRspOptionSelfCloseAction(CThostFtdcInputOptionSelfCloseActionF
 }
 
 void uv_trader::OnRspCombActionInsert(CThostFtdcInputCombActionField *pInputCombAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspCombActionInsert------>";
+  std::string log = "[UV] OnRspCombActionInsert------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInputCombActionField* _pInputCombAction = NULL;
   if (pInputCombAction) {
@@ -1469,7 +1466,7 @@ void uv_trader::OnRspCombActionInsert(CThostFtdcInputCombActionField *pInputComb
 }
 
 void uv_trader::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryOrder------>";
+  std::string log = "[UV] OnRspQryOrder------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcOrderField* _pOrder = NULL;
   if (pOrder) {
@@ -1480,7 +1477,7 @@ void uv_trader::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoFie
 }
 
 void uv_trader::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTrade------>";
+  std::string log = "[UV] OnRspQryTrade------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradeField* _pTrade = NULL;
   if (pTrade) {
@@ -1491,7 +1488,7 @@ void uv_trader::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoFie
 }
 
 void uv_trader::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestorPosition------>";
+  std::string log = "[UV] OnRspQryInvestorPosition------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestorPositionField* _pInvestorPosition = NULL;
   if (pInvestorPosition) {
@@ -1502,7 +1499,7 @@ void uv_trader::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
 }
 
 void uv_trader::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTradingAccount------>";
+  std::string log = "[UV] OnRspQryTradingAccount------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradingAccountField* _pTradingAccount = NULL;
   if (pTradingAccount) {
@@ -1513,7 +1510,7 @@ void uv_trader::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
 }
 
 void uv_trader::OnRspQryInvestor(CThostFtdcInvestorField *pInvestor, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestor------>";
+  std::string log = "[UV] OnRspQryInvestor------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestorField* _pInvestor = NULL;
   if (pInvestor) {
@@ -1524,7 +1521,7 @@ void uv_trader::OnRspQryInvestor(CThostFtdcInvestorField *pInvestor, CThostFtdcR
 }
 
 void uv_trader::OnRspQryTradingCode(CThostFtdcTradingCodeField *pTradingCode, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTradingCode------>";
+  std::string log = "[UV] OnRspQryTradingCode------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradingCodeField* _pTradingCode = NULL;
   if (pTradingCode) {
@@ -1535,7 +1532,7 @@ void uv_trader::OnRspQryTradingCode(CThostFtdcTradingCodeField *pTradingCode, CT
 }
 
 void uv_trader::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField *pInstrumentMarginRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInstrumentMarginRate------>";
+  std::string log = "[UV] OnRspQryInstrumentMarginRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInstrumentMarginRateField* _pInstrumentMarginRate = NULL;
   if (pInstrumentMarginRate) {
@@ -1546,7 +1543,7 @@ void uv_trader::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField
 }
 
 void uv_trader::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField *pInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInstrumentCommissionRate------>";
+  std::string log = "[UV] OnRspQryInstrumentCommissionRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInstrumentCommissionRateField* _pInstrumentCommissionRate = NULL;
   if (pInstrumentCommissionRate) {
@@ -1557,7 +1554,7 @@ void uv_trader::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionR
 }
 
 void uv_trader::OnRspQryExchange(CThostFtdcExchangeField *pExchange, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryExchange------>";
+  std::string log = "[UV] OnRspQryExchange------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcExchangeField* _pExchange = NULL;
   if (pExchange) {
@@ -1568,7 +1565,7 @@ void uv_trader::OnRspQryExchange(CThostFtdcExchangeField *pExchange, CThostFtdcR
 }
 
 void uv_trader::OnRspQryProduct(CThostFtdcProductField *pProduct, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryProduct------>";
+  std::string log = "[UV] OnRspQryProduct------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcProductField* _pProduct = NULL;
   if (pProduct) {
@@ -1579,7 +1576,7 @@ void uv_trader::OnRspQryProduct(CThostFtdcProductField *pProduct, CThostFtdcRspI
 }
 
 void uv_trader::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInstrument------>";
+  std::string log = "[UV] OnRspQryInstrument------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInstrumentField* _pInstrument = NULL;
   if (pInstrument) {
@@ -1590,7 +1587,7 @@ void uv_trader::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
 }
 
 void uv_trader::OnRspQryDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryDepthMarketData------>";
+  std::string log = "[UV] OnRspQryDepthMarketData------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcDepthMarketDataField* _pDepthMarketData = NULL;
   if (pDepthMarketData) {
@@ -1601,7 +1598,7 @@ void uv_trader::OnRspQryDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMa
 }
 
 void uv_trader::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQrySettlementInfo------>";
+  std::string log = "[UV] OnRspQrySettlementInfo------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcSettlementInfoField* _pSettlementInfo = NULL;
   if (pSettlementInfo) {
@@ -1612,7 +1609,7 @@ void uv_trader::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlemen
 }
 
 void uv_trader::OnRspQryTransferBank(CThostFtdcTransferBankField *pTransferBank, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTransferBank------>";
+  std::string log = "[UV] OnRspQryTransferBank------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTransferBankField* _pTransferBank = NULL;
   if (pTransferBank) {
@@ -1623,7 +1620,7 @@ void uv_trader::OnRspQryTransferBank(CThostFtdcTransferBankField *pTransferBank,
 }
 
 void uv_trader::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestorPositionDetail------>";
+  std::string log = "[UV] OnRspQryInvestorPositionDetail------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestorPositionDetailField* _pInvestorPositionDetail = NULL;
   if (pInvestorPositionDetail) {
@@ -1634,7 +1631,7 @@ void uv_trader::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
 }
 
 void uv_trader::OnRspQryNotice(CThostFtdcNoticeField *pNotice, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryNotice------>";
+  std::string log = "[UV] OnRspQryNotice------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcNoticeField* _pNotice = NULL;
   if (pNotice) {
@@ -1645,7 +1642,7 @@ void uv_trader::OnRspQryNotice(CThostFtdcNoticeField *pNotice, CThostFtdcRspInfo
 }
 
 void uv_trader::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQrySettlementInfoConfirm------>";
+  std::string log = "[UV] OnRspQrySettlementInfoConfirm------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcSettlementInfoConfirmField* _pSettlementInfoConfirm = NULL;
   if (pSettlementInfoConfirm) {
@@ -1656,7 +1653,7 @@ void uv_trader::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmFie
 }
 
 void uv_trader::OnRspQryInvestorPositionCombineDetail(CThostFtdcInvestorPositionCombineDetailField *pInvestorPositionCombineDetail, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestorPositionCombineDetail------>";
+  std::string log = "[UV] OnRspQryInvestorPositionCombineDetail------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestorPositionCombineDetailField* _pInvestorPositionCombineDetail = NULL;
   if (pInvestorPositionCombineDetail) {
@@ -1667,7 +1664,7 @@ void uv_trader::OnRspQryInvestorPositionCombineDetail(CThostFtdcInvestorPosition
 }
 
 void uv_trader::OnRspQryCFMMCTradingAccountKey(CThostFtdcCFMMCTradingAccountKeyField *pCFMMCTradingAccountKey, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryCFMMCTradingAccountKey------>";
+  std::string log = "[UV] OnRspQryCFMMCTradingAccountKey------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcCFMMCTradingAccountKeyField* _pCFMMCTradingAccountKey = NULL;
   if (pCFMMCTradingAccountKey) {
@@ -1678,7 +1675,7 @@ void uv_trader::OnRspQryCFMMCTradingAccountKey(CThostFtdcCFMMCTradingAccountKeyF
 }
 
 void uv_trader::OnRspQryEWarrantOffset(CThostFtdcEWarrantOffsetField *pEWarrantOffset, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryEWarrantOffset------>";
+  std::string log = "[UV] OnRspQryEWarrantOffset------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcEWarrantOffsetField* _pEWarrantOffset = NULL;
   if (pEWarrantOffset) {
@@ -1689,7 +1686,7 @@ void uv_trader::OnRspQryEWarrantOffset(CThostFtdcEWarrantOffsetField *pEWarrantO
 }
 
 void uv_trader::OnRspQryInvestorProductGroupMargin(CThostFtdcInvestorProductGroupMarginField *pInvestorProductGroupMargin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestorProductGroupMargin------>";
+  std::string log = "[UV] OnRspQryInvestorProductGroupMargin------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestorProductGroupMarginField* _pInvestorProductGroupMargin = NULL;
   if (pInvestorProductGroupMargin) {
@@ -1700,7 +1697,7 @@ void uv_trader::OnRspQryInvestorProductGroupMargin(CThostFtdcInvestorProductGrou
 }
 
 void uv_trader::OnRspQryExchangeMarginRate(CThostFtdcExchangeMarginRateField *pExchangeMarginRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryExchangeMarginRate------>";
+  std::string log = "[UV] OnRspQryExchangeMarginRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcExchangeMarginRateField* _pExchangeMarginRate = NULL;
   if (pExchangeMarginRate) {
@@ -1711,7 +1708,7 @@ void uv_trader::OnRspQryExchangeMarginRate(CThostFtdcExchangeMarginRateField *pE
 }
 
 void uv_trader::OnRspQryExchangeMarginRateAdjust(CThostFtdcExchangeMarginRateAdjustField *pExchangeMarginRateAdjust, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryExchangeMarginRateAdjust------>";
+  std::string log = "[UV] OnRspQryExchangeMarginRateAdjust------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcExchangeMarginRateAdjustField* _pExchangeMarginRateAdjust = NULL;
   if (pExchangeMarginRateAdjust) {
@@ -1722,7 +1719,7 @@ void uv_trader::OnRspQryExchangeMarginRateAdjust(CThostFtdcExchangeMarginRateAdj
 }
 
 void uv_trader::OnRspQryExchangeRate(CThostFtdcExchangeRateField *pExchangeRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryExchangeRate------>";
+  std::string log = "[UV] OnRspQryExchangeRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcExchangeRateField* _pExchangeRate = NULL;
   if (pExchangeRate) {
@@ -1733,7 +1730,7 @@ void uv_trader::OnRspQryExchangeRate(CThostFtdcExchangeRateField *pExchangeRate,
 }
 
 void uv_trader::OnRspQrySecAgentACIDMap(CThostFtdcSecAgentACIDMapField *pSecAgentACIDMap, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQrySecAgentACIDMap------>";
+  std::string log = "[UV] OnRspQrySecAgentACIDMap------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcSecAgentACIDMapField* _pSecAgentACIDMap = NULL;
   if (pSecAgentACIDMap) {
@@ -1744,7 +1741,7 @@ void uv_trader::OnRspQrySecAgentACIDMap(CThostFtdcSecAgentACIDMapField *pSecAgen
 }
 
 void uv_trader::OnRspQryProductExchRate(CThostFtdcProductExchRateField *pProductExchRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryProductExchRate------>";
+  std::string log = "[UV] OnRspQryProductExchRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcProductExchRateField* _pProductExchRate = NULL;
   if (pProductExchRate) {
@@ -1755,7 +1752,7 @@ void uv_trader::OnRspQryProductExchRate(CThostFtdcProductExchRateField *pProduct
 }
 
 void uv_trader::OnRspQryProductGroup(CThostFtdcProductGroupField *pProductGroup, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryProductGroup------>";
+  std::string log = "[UV] OnRspQryProductGroup------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcProductGroupField* _pProductGroup = NULL;
   if (pProductGroup) {
@@ -1766,7 +1763,7 @@ void uv_trader::OnRspQryProductGroup(CThostFtdcProductGroupField *pProductGroup,
 }
 
 void uv_trader::OnRspQryMMInstrumentCommissionRate(CThostFtdcMMInstrumentCommissionRateField *pMMInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryMMInstrumentCommissionRate------>";
+  std::string log = "[UV] OnRspQryMMInstrumentCommissionRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcMMInstrumentCommissionRateField* _pMMInstrumentCommissionRate = NULL;
   if (pMMInstrumentCommissionRate) {
@@ -1777,7 +1774,7 @@ void uv_trader::OnRspQryMMInstrumentCommissionRate(CThostFtdcMMInstrumentCommiss
 }
 
 void uv_trader::OnRspQryMMOptionInstrCommRate(CThostFtdcMMOptionInstrCommRateField *pMMOptionInstrCommRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryMMOptionInstrCommRate------>";
+  std::string log = "[UV] OnRspQryMMOptionInstrCommRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcMMOptionInstrCommRateField* _pMMOptionInstrCommRate = NULL;
   if (pMMOptionInstrCommRate) {
@@ -1788,7 +1785,7 @@ void uv_trader::OnRspQryMMOptionInstrCommRate(CThostFtdcMMOptionInstrCommRateFie
 }
 
 void uv_trader::OnRspQryInstrumentOrderCommRate(CThostFtdcInstrumentOrderCommRateField *pInstrumentOrderCommRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInstrumentOrderCommRate------>";
+  std::string log = "[UV] OnRspQryInstrumentOrderCommRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInstrumentOrderCommRateField* _pInstrumentOrderCommRate = NULL;
   if (pInstrumentOrderCommRate) {
@@ -1799,7 +1796,7 @@ void uv_trader::OnRspQryInstrumentOrderCommRate(CThostFtdcInstrumentOrderCommRat
 }
 
 void uv_trader::OnRspQrySecAgentTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQrySecAgentTradingAccount------>";
+  std::string log = "[UV] OnRspQrySecAgentTradingAccount------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradingAccountField* _pTradingAccount = NULL;
   if (pTradingAccount) {
@@ -1810,7 +1807,7 @@ void uv_trader::OnRspQrySecAgentTradingAccount(CThostFtdcTradingAccountField *pT
 }
 
 void uv_trader::OnRspQrySecAgentCheckMode(CThostFtdcSecAgentCheckModeField *pSecAgentCheckMode, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQrySecAgentCheckMode------>";
+  std::string log = "[UV] OnRspQrySecAgentCheckMode------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcSecAgentCheckModeField* _pSecAgentCheckMode = NULL;
   if (pSecAgentCheckMode) {
@@ -1821,7 +1818,7 @@ void uv_trader::OnRspQrySecAgentCheckMode(CThostFtdcSecAgentCheckModeField *pSec
 }
 
 void uv_trader::OnRspQryOptionInstrTradeCost(CThostFtdcOptionInstrTradeCostField *pOptionInstrTradeCost, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryOptionInstrTradeCost------>";
+  std::string log = "[UV] OnRspQryOptionInstrTradeCost------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcOptionInstrTradeCostField* _pOptionInstrTradeCost = NULL;
   if (pOptionInstrTradeCost) {
@@ -1832,7 +1829,7 @@ void uv_trader::OnRspQryOptionInstrTradeCost(CThostFtdcOptionInstrTradeCostField
 }
 
 void uv_trader::OnRspQryOptionInstrCommRate(CThostFtdcOptionInstrCommRateField *pOptionInstrCommRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryOptionInstrCommRate------>";
+  std::string log = "[UV] OnRspQryOptionInstrCommRate------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcOptionInstrCommRateField* _pOptionInstrCommRate = NULL;
   if (pOptionInstrCommRate) {
@@ -1843,7 +1840,7 @@ void uv_trader::OnRspQryOptionInstrCommRate(CThostFtdcOptionInstrCommRateField *
 }
 
 void uv_trader::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryExecOrder------>";
+  std::string log = "[UV] OnRspQryExecOrder------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcExecOrderField* _pExecOrder = NULL;
   if (pExecOrder) {
@@ -1854,7 +1851,7 @@ void uv_trader::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFt
 }
 
 void uv_trader::OnRspQryForQuote(CThostFtdcForQuoteField *pForQuote, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryForQuote------>";
+  std::string log = "[UV] OnRspQryForQuote------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcForQuoteField* _pForQuote = NULL;
   if (pForQuote) {
@@ -1865,7 +1862,7 @@ void uv_trader::OnRspQryForQuote(CThostFtdcForQuoteField *pForQuote, CThostFtdcR
 }
 
 void uv_trader::OnRspQryQuote(CThostFtdcQuoteField *pQuote, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryQuote------>";
+  std::string log = "[UV] OnRspQryQuote------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcQuoteField* _pQuote = NULL;
   if (pQuote) {
@@ -1876,7 +1873,7 @@ void uv_trader::OnRspQryQuote(CThostFtdcQuoteField *pQuote, CThostFtdcRspInfoFie
 }
 
 void uv_trader::OnRspQryOptionSelfClose(CThostFtdcOptionSelfCloseField *pOptionSelfClose, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryOptionSelfClose------>";
+  std::string log = "[UV] OnRspQryOptionSelfClose------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcOptionSelfCloseField* _pOptionSelfClose = NULL;
   if (pOptionSelfClose) {
@@ -1887,7 +1884,7 @@ void uv_trader::OnRspQryOptionSelfClose(CThostFtdcOptionSelfCloseField *pOptionS
 }
 
 void uv_trader::OnRspQryInvestUnit(CThostFtdcInvestUnitField *pInvestUnit, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryInvestUnit------>";
+  std::string log = "[UV] OnRspQryInvestUnit------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcInvestUnitField* _pInvestUnit = NULL;
   if (pInvestUnit) {
@@ -1898,7 +1895,7 @@ void uv_trader::OnRspQryInvestUnit(CThostFtdcInvestUnitField *pInvestUnit, CThos
 }
 
 void uv_trader::OnRspQryCombInstrumentGuard(CThostFtdcCombInstrumentGuardField *pCombInstrumentGuard, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryCombInstrumentGuard------>";
+  std::string log = "[UV] OnRspQryCombInstrumentGuard------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcCombInstrumentGuardField* _pCombInstrumentGuard = NULL;
   if (pCombInstrumentGuard) {
@@ -1909,7 +1906,7 @@ void uv_trader::OnRspQryCombInstrumentGuard(CThostFtdcCombInstrumentGuardField *
 }
 
 void uv_trader::OnRspQryCombAction(CThostFtdcCombActionField *pCombAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryCombAction------>";
+  std::string log = "[UV] OnRspQryCombAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcCombActionField* _pCombAction = NULL;
   if (pCombAction) {
@@ -1920,7 +1917,7 @@ void uv_trader::OnRspQryCombAction(CThostFtdcCombActionField *pCombAction, CThos
 }
 
 void uv_trader::OnRspQryTransferSerial(CThostFtdcTransferSerialField *pTransferSerial, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTransferSerial------>";
+  std::string log = "[UV] OnRspQryTransferSerial------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTransferSerialField* _pTransferSerial = NULL;
   if (pTransferSerial) {
@@ -1931,7 +1928,7 @@ void uv_trader::OnRspQryTransferSerial(CThostFtdcTransferSerialField *pTransferS
 }
 
 void uv_trader::OnRspQryAccountregister(CThostFtdcAccountregisterField *pAccountregister, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryAccountregister------>";
+  std::string log = "[UV] OnRspQryAccountregister------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcAccountregisterField* _pAccountregister = NULL;
   if (pAccountregister) {
@@ -1942,7 +1939,7 @@ void uv_trader::OnRspQryAccountregister(CThostFtdcAccountregisterField *pAccount
 }
 
 void uv_trader::OnRtnOrder(CThostFtdcOrderField *pOrder) {
-  std::string log = "uv_trader OnRtnOrder------>";
+  std::string log = "[UV] OnRtnOrder------>";
   logger_cout(log.c_str());
   CThostFtdcOrderField* _pOrder = NULL;
   if (pOrder) {
@@ -1953,7 +1950,7 @@ void uv_trader::OnRtnOrder(CThostFtdcOrderField *pOrder) {
 }
 
 void uv_trader::OnRtnTrade(CThostFtdcTradeField *pTrade) {
-  std::string log = "uv_trader OnRtnTrade------>";
+  std::string log = "[UV] OnRtnTrade------>";
   logger_cout(log.c_str());
   CThostFtdcTradeField* _pTrade = NULL;
   if (pTrade) {
@@ -1964,7 +1961,7 @@ void uv_trader::OnRtnTrade(CThostFtdcTradeField *pTrade) {
 }
 
 void uv_trader::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnOrderInsert------>";
+  std::string log = "[UV] OnErrRtnOrderInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputOrderField* _pInputOrder = NULL;
   if (pInputOrder) {
@@ -1975,7 +1972,7 @@ void uv_trader::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CTho
 }
 
 void uv_trader::OnErrRtnOrderAction(CThostFtdcOrderActionField *pOrderAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnOrderAction------>";
+  std::string log = "[UV] OnErrRtnOrderAction------>";
   logger_cout(log.c_str());
   CThostFtdcOrderActionField* _pOrderAction = NULL;
   if (pOrderAction) {
@@ -1986,7 +1983,7 @@ void uv_trader::OnErrRtnOrderAction(CThostFtdcOrderActionField *pOrderAction, CT
 }
 
 void uv_trader::OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) {
-  std::string log = "uv_trader OnRtnInstrumentStatus------>";
+  std::string log = "[UV] OnRtnInstrumentStatus------>";
   logger_cout(log.c_str());
   CThostFtdcInstrumentStatusField* _pInstrumentStatus = NULL;
   if (pInstrumentStatus) {
@@ -1997,7 +1994,7 @@ void uv_trader::OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrume
 }
 
 void uv_trader::OnRtnBulletin(CThostFtdcBulletinField *pBulletin) {
-  std::string log = "uv_trader OnRtnBulletin------>";
+  std::string log = "[UV] OnRtnBulletin------>";
   logger_cout(log.c_str());
   CThostFtdcBulletinField* _pBulletin = NULL;
   if (pBulletin) {
@@ -2008,7 +2005,7 @@ void uv_trader::OnRtnBulletin(CThostFtdcBulletinField *pBulletin) {
 }
 
 void uv_trader::OnRtnTradingNotice(CThostFtdcTradingNoticeInfoField *pTradingNoticeInfo) {
-  std::string log = "uv_trader OnRtnTradingNotice------>";
+  std::string log = "[UV] OnRtnTradingNotice------>";
   logger_cout(log.c_str());
   CThostFtdcTradingNoticeInfoField* _pTradingNoticeInfo = NULL;
   if (pTradingNoticeInfo) {
@@ -2019,7 +2016,7 @@ void uv_trader::OnRtnTradingNotice(CThostFtdcTradingNoticeInfoField *pTradingNot
 }
 
 void uv_trader::OnRtnErrorConditionalOrder(CThostFtdcErrorConditionalOrderField *pErrorConditionalOrder) {
-  std::string log = "uv_trader OnRtnErrorConditionalOrder------>";
+  std::string log = "[UV] OnRtnErrorConditionalOrder------>";
   logger_cout(log.c_str());
   CThostFtdcErrorConditionalOrderField* _pErrorConditionalOrder = NULL;
   if (pErrorConditionalOrder) {
@@ -2030,7 +2027,7 @@ void uv_trader::OnRtnErrorConditionalOrder(CThostFtdcErrorConditionalOrderField 
 }
 
 void uv_trader::OnRtnExecOrder(CThostFtdcExecOrderField *pExecOrder) {
-  std::string log = "uv_trader OnRtnExecOrder------>";
+  std::string log = "[UV] OnRtnExecOrder------>";
   logger_cout(log.c_str());
   CThostFtdcExecOrderField* _pExecOrder = NULL;
   if (pExecOrder) {
@@ -2041,7 +2038,7 @@ void uv_trader::OnRtnExecOrder(CThostFtdcExecOrderField *pExecOrder) {
 }
 
 void uv_trader::OnErrRtnExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnExecOrderInsert------>";
+  std::string log = "[UV] OnErrRtnExecOrderInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputExecOrderField* _pInputExecOrder = NULL;
   if (pInputExecOrder) {
@@ -2052,7 +2049,7 @@ void uv_trader::OnErrRtnExecOrderInsert(CThostFtdcInputExecOrderField *pInputExe
 }
 
 void uv_trader::OnErrRtnExecOrderAction(CThostFtdcExecOrderActionField *pExecOrderAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnExecOrderAction------>";
+  std::string log = "[UV] OnErrRtnExecOrderAction------>";
   logger_cout(log.c_str());
   CThostFtdcExecOrderActionField* _pExecOrderAction = NULL;
   if (pExecOrderAction) {
@@ -2063,7 +2060,7 @@ void uv_trader::OnErrRtnExecOrderAction(CThostFtdcExecOrderActionField *pExecOrd
 }
 
 void uv_trader::OnErrRtnForQuoteInsert(CThostFtdcInputForQuoteField *pInputForQuote, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnForQuoteInsert------>";
+  std::string log = "[UV] OnErrRtnForQuoteInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputForQuoteField* _pInputForQuote = NULL;
   if (pInputForQuote) {
@@ -2074,7 +2071,7 @@ void uv_trader::OnErrRtnForQuoteInsert(CThostFtdcInputForQuoteField *pInputForQu
 }
 
 void uv_trader::OnRtnQuote(CThostFtdcQuoteField *pQuote) {
-  std::string log = "uv_trader OnRtnQuote------>";
+  std::string log = "[UV] OnRtnQuote------>";
   logger_cout(log.c_str());
   CThostFtdcQuoteField* _pQuote = NULL;
   if (pQuote) {
@@ -2085,7 +2082,7 @@ void uv_trader::OnRtnQuote(CThostFtdcQuoteField *pQuote) {
 }
 
 void uv_trader::OnErrRtnQuoteInsert(CThostFtdcInputQuoteField *pInputQuote, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnQuoteInsert------>";
+  std::string log = "[UV] OnErrRtnQuoteInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputQuoteField* _pInputQuote = NULL;
   if (pInputQuote) {
@@ -2096,7 +2093,7 @@ void uv_trader::OnErrRtnQuoteInsert(CThostFtdcInputQuoteField *pInputQuote, CTho
 }
 
 void uv_trader::OnErrRtnQuoteAction(CThostFtdcQuoteActionField *pQuoteAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnQuoteAction------>";
+  std::string log = "[UV] OnErrRtnQuoteAction------>";
   logger_cout(log.c_str());
   CThostFtdcQuoteActionField* _pQuoteAction = NULL;
   if (pQuoteAction) {
@@ -2107,7 +2104,7 @@ void uv_trader::OnErrRtnQuoteAction(CThostFtdcQuoteActionField *pQuoteAction, CT
 }
 
 void uv_trader::OnRtnForQuoteRsp(CThostFtdcForQuoteRspField *pForQuoteRsp) {
-  std::string log = "uv_trader OnRtnForQuoteRsp------>";
+  std::string log = "[UV] OnRtnForQuoteRsp------>";
   logger_cout(log.c_str());
   CThostFtdcForQuoteRspField* _pForQuoteRsp = NULL;
   if (pForQuoteRsp) {
@@ -2118,7 +2115,7 @@ void uv_trader::OnRtnForQuoteRsp(CThostFtdcForQuoteRspField *pForQuoteRsp) {
 }
 
 void uv_trader::OnRtnCFMMCTradingAccountToken(CThostFtdcCFMMCTradingAccountTokenField *pCFMMCTradingAccountToken) {
-  std::string log = "uv_trader OnRtnCFMMCTradingAccountToken------>";
+  std::string log = "[UV] OnRtnCFMMCTradingAccountToken------>";
   logger_cout(log.c_str());
   CThostFtdcCFMMCTradingAccountTokenField* _pCFMMCTradingAccountToken = NULL;
   if (pCFMMCTradingAccountToken) {
@@ -2129,7 +2126,7 @@ void uv_trader::OnRtnCFMMCTradingAccountToken(CThostFtdcCFMMCTradingAccountToken
 }
 
 void uv_trader::OnErrRtnBatchOrderAction(CThostFtdcBatchOrderActionField *pBatchOrderAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnBatchOrderAction------>";
+  std::string log = "[UV] OnErrRtnBatchOrderAction------>";
   logger_cout(log.c_str());
   CThostFtdcBatchOrderActionField* _pBatchOrderAction = NULL;
   if (pBatchOrderAction) {
@@ -2140,7 +2137,7 @@ void uv_trader::OnErrRtnBatchOrderAction(CThostFtdcBatchOrderActionField *pBatch
 }
 
 void uv_trader::OnRtnOptionSelfClose(CThostFtdcOptionSelfCloseField *pOptionSelfClose) {
-  std::string log = "uv_trader OnRtnOptionSelfClose------>";
+  std::string log = "[UV] OnRtnOptionSelfClose------>";
   logger_cout(log.c_str());
   CThostFtdcOptionSelfCloseField* _pOptionSelfClose = NULL;
   if (pOptionSelfClose) {
@@ -2151,7 +2148,7 @@ void uv_trader::OnRtnOptionSelfClose(CThostFtdcOptionSelfCloseField *pOptionSelf
 }
 
 void uv_trader::OnErrRtnOptionSelfCloseInsert(CThostFtdcInputOptionSelfCloseField *pInputOptionSelfClose, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnOptionSelfCloseInsert------>";
+  std::string log = "[UV] OnErrRtnOptionSelfCloseInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputOptionSelfCloseField* _pInputOptionSelfClose = NULL;
   if (pInputOptionSelfClose) {
@@ -2162,7 +2159,7 @@ void uv_trader::OnErrRtnOptionSelfCloseInsert(CThostFtdcInputOptionSelfCloseFiel
 }
 
 void uv_trader::OnErrRtnOptionSelfCloseAction(CThostFtdcOptionSelfCloseActionField *pOptionSelfCloseAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnOptionSelfCloseAction------>";
+  std::string log = "[UV] OnErrRtnOptionSelfCloseAction------>";
   logger_cout(log.c_str());
   CThostFtdcOptionSelfCloseActionField* _pOptionSelfCloseAction = NULL;
   if (pOptionSelfCloseAction) {
@@ -2173,7 +2170,7 @@ void uv_trader::OnErrRtnOptionSelfCloseAction(CThostFtdcOptionSelfCloseActionFie
 }
 
 void uv_trader::OnRtnCombAction(CThostFtdcCombActionField *pCombAction) {
-  std::string log = "uv_trader OnRtnCombAction------>";
+  std::string log = "[UV] OnRtnCombAction------>";
   logger_cout(log.c_str());
   CThostFtdcCombActionField* _pCombAction = NULL;
   if (pCombAction) {
@@ -2184,7 +2181,7 @@ void uv_trader::OnRtnCombAction(CThostFtdcCombActionField *pCombAction) {
 }
 
 void uv_trader::OnErrRtnCombActionInsert(CThostFtdcInputCombActionField *pInputCombAction, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnCombActionInsert------>";
+  std::string log = "[UV] OnErrRtnCombActionInsert------>";
   logger_cout(log.c_str());
   CThostFtdcInputCombActionField* _pInputCombAction = NULL;
   if (pInputCombAction) {
@@ -2195,7 +2192,7 @@ void uv_trader::OnErrRtnCombActionInsert(CThostFtdcInputCombActionField *pInputC
 }
 
 void uv_trader::OnRspQryContractBank(CThostFtdcContractBankField *pContractBank, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryContractBank------>";
+  std::string log = "[UV] OnRspQryContractBank------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcContractBankField* _pContractBank = NULL;
   if (pContractBank) {
@@ -2206,7 +2203,7 @@ void uv_trader::OnRspQryContractBank(CThostFtdcContractBankField *pContractBank,
 }
 
 void uv_trader::OnRspQryParkedOrder(CThostFtdcParkedOrderField *pParkedOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryParkedOrder------>";
+  std::string log = "[UV] OnRspQryParkedOrder------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcParkedOrderField* _pParkedOrder = NULL;
   if (pParkedOrder) {
@@ -2217,7 +2214,7 @@ void uv_trader::OnRspQryParkedOrder(CThostFtdcParkedOrderField *pParkedOrder, CT
 }
 
 void uv_trader::OnRspQryParkedOrderAction(CThostFtdcParkedOrderActionField *pParkedOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryParkedOrderAction------>";
+  std::string log = "[UV] OnRspQryParkedOrderAction------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcParkedOrderActionField* _pParkedOrderAction = NULL;
   if (pParkedOrderAction) {
@@ -2228,7 +2225,7 @@ void uv_trader::OnRspQryParkedOrderAction(CThostFtdcParkedOrderActionField *pPar
 }
 
 void uv_trader::OnRspQryTradingNotice(CThostFtdcTradingNoticeField *pTradingNotice, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryTradingNotice------>";
+  std::string log = "[UV] OnRspQryTradingNotice------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcTradingNoticeField* _pTradingNotice = NULL;
   if (pTradingNotice) {
@@ -2239,7 +2236,7 @@ void uv_trader::OnRspQryTradingNotice(CThostFtdcTradingNoticeField *pTradingNoti
 }
 
 void uv_trader::OnRspQryBrokerTradingParams(CThostFtdcBrokerTradingParamsField *pBrokerTradingParams, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryBrokerTradingParams------>";
+  std::string log = "[UV] OnRspQryBrokerTradingParams------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcBrokerTradingParamsField* _pBrokerTradingParams = NULL;
   if (pBrokerTradingParams) {
@@ -2250,7 +2247,7 @@ void uv_trader::OnRspQryBrokerTradingParams(CThostFtdcBrokerTradingParamsField *
 }
 
 void uv_trader::OnRspQryBrokerTradingAlgos(CThostFtdcBrokerTradingAlgosField *pBrokerTradingAlgos, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQryBrokerTradingAlgos------>";
+  std::string log = "[UV] OnRspQryBrokerTradingAlgos------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcBrokerTradingAlgosField* _pBrokerTradingAlgos = NULL;
   if (pBrokerTradingAlgos) {
@@ -2261,7 +2258,7 @@ void uv_trader::OnRspQryBrokerTradingAlgos(CThostFtdcBrokerTradingAlgosField *pB
 }
 
 void uv_trader::OnRspQueryCFMMCTradingAccountToken(CThostFtdcQueryCFMMCTradingAccountTokenField *pQueryCFMMCTradingAccountToken, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQueryCFMMCTradingAccountToken------>";
+  std::string log = "[UV] OnRspQueryCFMMCTradingAccountToken------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcQueryCFMMCTradingAccountTokenField* _pQueryCFMMCTradingAccountToken = NULL;
   if (pQueryCFMMCTradingAccountToken) {
@@ -2272,7 +2269,7 @@ void uv_trader::OnRspQueryCFMMCTradingAccountToken(CThostFtdcQueryCFMMCTradingAc
 }
 
 void uv_trader::OnRtnFromBankToFutureByBank(CThostFtdcRspTransferField *pRspTransfer) {
-  std::string log = "uv_trader OnRtnFromBankToFutureByBank------>";
+  std::string log = "[UV] OnRtnFromBankToFutureByBank------>";
   logger_cout(log.c_str());
   CThostFtdcRspTransferField* _pRspTransfer = NULL;
   if (pRspTransfer) {
@@ -2283,7 +2280,7 @@ void uv_trader::OnRtnFromBankToFutureByBank(CThostFtdcRspTransferField *pRspTran
 }
 
 void uv_trader::OnRtnFromFutureToBankByBank(CThostFtdcRspTransferField *pRspTransfer) {
-  std::string log = "uv_trader OnRtnFromFutureToBankByBank------>";
+  std::string log = "[UV] OnRtnFromFutureToBankByBank------>";
   logger_cout(log.c_str());
   CThostFtdcRspTransferField* _pRspTransfer = NULL;
   if (pRspTransfer) {
@@ -2294,7 +2291,7 @@ void uv_trader::OnRtnFromFutureToBankByBank(CThostFtdcRspTransferField *pRspTran
 }
 
 void uv_trader::OnRtnRepealFromBankToFutureByBank(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromBankToFutureByBank------>";
+  std::string log = "[UV] OnRtnRepealFromBankToFutureByBank------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2305,7 +2302,7 @@ void uv_trader::OnRtnRepealFromBankToFutureByBank(CThostFtdcRspRepealField *pRsp
 }
 
 void uv_trader::OnRtnRepealFromFutureToBankByBank(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromFutureToBankByBank------>";
+  std::string log = "[UV] OnRtnRepealFromFutureToBankByBank------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2316,7 +2313,7 @@ void uv_trader::OnRtnRepealFromFutureToBankByBank(CThostFtdcRspRepealField *pRsp
 }
 
 void uv_trader::OnRtnFromBankToFutureByFuture(CThostFtdcRspTransferField *pRspTransfer) {
-  std::string log = "uv_trader OnRtnFromBankToFutureByFuture------>";
+  std::string log = "[UV] OnRtnFromBankToFutureByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcRspTransferField* _pRspTransfer = NULL;
   if (pRspTransfer) {
@@ -2327,7 +2324,7 @@ void uv_trader::OnRtnFromBankToFutureByFuture(CThostFtdcRspTransferField *pRspTr
 }
 
 void uv_trader::OnRtnFromFutureToBankByFuture(CThostFtdcRspTransferField *pRspTransfer) {
-  std::string log = "uv_trader OnRtnFromFutureToBankByFuture------>";
+  std::string log = "[UV] OnRtnFromFutureToBankByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcRspTransferField* _pRspTransfer = NULL;
   if (pRspTransfer) {
@@ -2338,7 +2335,7 @@ void uv_trader::OnRtnFromFutureToBankByFuture(CThostFtdcRspTransferField *pRspTr
 }
 
 void uv_trader::OnRtnRepealFromBankToFutureByFutureManual(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromBankToFutureByFutureManual------>";
+  std::string log = "[UV] OnRtnRepealFromBankToFutureByFutureManual------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2349,7 +2346,7 @@ void uv_trader::OnRtnRepealFromBankToFutureByFutureManual(CThostFtdcRspRepealFie
 }
 
 void uv_trader::OnRtnRepealFromFutureToBankByFutureManual(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromFutureToBankByFutureManual------>";
+  std::string log = "[UV] OnRtnRepealFromFutureToBankByFutureManual------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2360,7 +2357,7 @@ void uv_trader::OnRtnRepealFromFutureToBankByFutureManual(CThostFtdcRspRepealFie
 }
 
 void uv_trader::OnRtnQueryBankBalanceByFuture(CThostFtdcNotifyQueryAccountField *pNotifyQueryAccount) {
-  std::string log = "uv_trader OnRtnQueryBankBalanceByFuture------>";
+  std::string log = "[UV] OnRtnQueryBankBalanceByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcNotifyQueryAccountField* _pNotifyQueryAccount = NULL;
   if (pNotifyQueryAccount) {
@@ -2371,7 +2368,7 @@ void uv_trader::OnRtnQueryBankBalanceByFuture(CThostFtdcNotifyQueryAccountField 
 }
 
 void uv_trader::OnErrRtnBankToFutureByFuture(CThostFtdcReqTransferField *pReqTransfer, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnBankToFutureByFuture------>";
+  std::string log = "[UV] OnErrRtnBankToFutureByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcReqTransferField* _pReqTransfer = NULL;
   if (pReqTransfer) {
@@ -2382,7 +2379,7 @@ void uv_trader::OnErrRtnBankToFutureByFuture(CThostFtdcReqTransferField *pReqTra
 }
 
 void uv_trader::OnErrRtnFutureToBankByFuture(CThostFtdcReqTransferField *pReqTransfer, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnFutureToBankByFuture------>";
+  std::string log = "[UV] OnErrRtnFutureToBankByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcReqTransferField* _pReqTransfer = NULL;
   if (pReqTransfer) {
@@ -2393,7 +2390,7 @@ void uv_trader::OnErrRtnFutureToBankByFuture(CThostFtdcReqTransferField *pReqTra
 }
 
 void uv_trader::OnErrRtnRepealBankToFutureByFutureManual(CThostFtdcReqRepealField *pReqRepeal, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnRepealBankToFutureByFutureManual------>";
+  std::string log = "[UV] OnErrRtnRepealBankToFutureByFutureManual------>";
   logger_cout(log.c_str());
   CThostFtdcReqRepealField* _pReqRepeal = NULL;
   if (pReqRepeal) {
@@ -2404,7 +2401,7 @@ void uv_trader::OnErrRtnRepealBankToFutureByFutureManual(CThostFtdcReqRepealFiel
 }
 
 void uv_trader::OnErrRtnRepealFutureToBankByFutureManual(CThostFtdcReqRepealField *pReqRepeal, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnRepealFutureToBankByFutureManual------>";
+  std::string log = "[UV] OnErrRtnRepealFutureToBankByFutureManual------>";
   logger_cout(log.c_str());
   CThostFtdcReqRepealField* _pReqRepeal = NULL;
   if (pReqRepeal) {
@@ -2415,7 +2412,7 @@ void uv_trader::OnErrRtnRepealFutureToBankByFutureManual(CThostFtdcReqRepealFiel
 }
 
 void uv_trader::OnErrRtnQueryBankBalanceByFuture(CThostFtdcReqQueryAccountField *pReqQueryAccount, CThostFtdcRspInfoField *pRspInfo) {
-  std::string log = "uv_trader OnErrRtnQueryBankBalanceByFuture------>";
+  std::string log = "[UV] OnErrRtnQueryBankBalanceByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcReqQueryAccountField* _pReqQueryAccount = NULL;
   if (pReqQueryAccount) {
@@ -2426,7 +2423,7 @@ void uv_trader::OnErrRtnQueryBankBalanceByFuture(CThostFtdcReqQueryAccountField 
 }
 
 void uv_trader::OnRtnRepealFromBankToFutureByFuture(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromBankToFutureByFuture------>";
+  std::string log = "[UV] OnRtnRepealFromBankToFutureByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2437,7 +2434,7 @@ void uv_trader::OnRtnRepealFromBankToFutureByFuture(CThostFtdcRspRepealField *pR
 }
 
 void uv_trader::OnRtnRepealFromFutureToBankByFuture(CThostFtdcRspRepealField *pRspRepeal) {
-  std::string log = "uv_trader OnRtnRepealFromFutureToBankByFuture------>";
+  std::string log = "[UV] OnRtnRepealFromFutureToBankByFuture------>";
   logger_cout(log.c_str());
   CThostFtdcRspRepealField* _pRspRepeal = NULL;
   if (pRspRepeal) {
@@ -2448,7 +2445,7 @@ void uv_trader::OnRtnRepealFromFutureToBankByFuture(CThostFtdcRspRepealField *pR
 }
 
 void uv_trader::OnRspFromBankToFutureByFuture(CThostFtdcReqTransferField *pReqTransfer, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspFromBankToFutureByFuture------>";
+  std::string log = "[UV] OnRspFromBankToFutureByFuture------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcReqTransferField* _pReqTransfer = NULL;
   if (pReqTransfer) {
@@ -2459,7 +2456,7 @@ void uv_trader::OnRspFromBankToFutureByFuture(CThostFtdcReqTransferField *pReqTr
 }
 
 void uv_trader::OnRspFromFutureToBankByFuture(CThostFtdcReqTransferField *pReqTransfer, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspFromFutureToBankByFuture------>";
+  std::string log = "[UV] OnRspFromFutureToBankByFuture------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcReqTransferField* _pReqTransfer = NULL;
   if (pReqTransfer) {
@@ -2470,7 +2467,7 @@ void uv_trader::OnRspFromFutureToBankByFuture(CThostFtdcReqTransferField *pReqTr
 }
 
 void uv_trader::OnRspQueryBankAccountMoneyByFuture(CThostFtdcReqQueryAccountField *pReqQueryAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  std::string log = "uv_trader OnRspQueryBankAccountMoneyByFuture------>";
+  std::string log = "[UV] OnRspQueryBankAccountMoneyByFuture------>";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   CThostFtdcReqQueryAccountField* _pReqQueryAccount = NULL;
   if (pReqQueryAccount) {
@@ -2481,7 +2478,7 @@ void uv_trader::OnRspQueryBankAccountMoneyByFuture(CThostFtdcReqQueryAccountFiel
 }
 
 void uv_trader::OnRtnOpenAccountByBank(CThostFtdcOpenAccountField *pOpenAccount) {
-  std::string log = "uv_trader OnRtnOpenAccountByBank------>";
+  std::string log = "[UV] OnRtnOpenAccountByBank------>";
   logger_cout(log.c_str());
   CThostFtdcOpenAccountField* _pOpenAccount = NULL;
   if (pOpenAccount) {
@@ -2492,7 +2489,7 @@ void uv_trader::OnRtnOpenAccountByBank(CThostFtdcOpenAccountField *pOpenAccount)
 }
 
 void uv_trader::OnRtnCancelAccountByBank(CThostFtdcCancelAccountField *pCancelAccount) {
-  std::string log = "uv_trader OnRtnCancelAccountByBank------>";
+  std::string log = "[UV] OnRtnCancelAccountByBank------>";
   logger_cout(log.c_str());
   CThostFtdcCancelAccountField* _pCancelAccount = NULL;
   if (pCancelAccount) {
@@ -2503,7 +2500,7 @@ void uv_trader::OnRtnCancelAccountByBank(CThostFtdcCancelAccountField *pCancelAc
 }
 
 void uv_trader::OnRtnChangeAccountByBank(CThostFtdcChangeAccountField *pChangeAccount) {
-  std::string log = "uv_trader OnRtnChangeAccountByBank------>";
+  std::string log = "[UV] OnRtnChangeAccountByBank------>";
   logger_cout(log.c_str());
   CThostFtdcChangeAccountField* _pChangeAccount = NULL;
   if (pChangeAccount) {

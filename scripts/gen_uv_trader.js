@@ -53,7 +53,7 @@ std::map<int, CbWrap*> uv_trader::cb_map;
 uv_trader::uv_trader(void) {
   iRequestID = 0;
   uv_async_init(uv_default_loop(),&async_t,NULL);
-  logger_cout("uv_trader init");
+  logger_cout("[UV:Init]");
 }
 
 uv_trader::~uv_trader(void) {
@@ -65,24 +65,24 @@ const char* uv_trader::GetTradingDay(){
 }
 
 int uv_trader::On(const char* eName,int cb_type, void(*callback)(CbRtnField* cbResult)) {
-  std::string log = "uv_trader On------>";
+  std::string log = "[UV:Register]";
   std::map<int, CbWrap*>::iterator it = cb_map.find(cb_type);
   if (it != cb_map.end()) {
-    logger_cout(log.append(" event id").append(to_string(cb_type)).append(" register repeat").c_str());
+    logger_cout(log.append(" EventID: ").append(to_string(cb_type)).append(" register repeat").c_str());
     return 1;
   }
 
   CbWrap* cb_wrap = new CbWrap();
   cb_wrap->callback = callback;
   cb_map[cb_type] = cb_wrap;
-  logger_cout(log.append(" Event:").append(eName).append(" ID:").append(to_string(cb_type)).append(" register").c_str());
+  logger_cout(log.append(" Event:").append(eName).append(" with ID:").append(to_string(cb_type)).c_str());
   return 0;
 }
 
 void uv_trader::Connect(UVConnectField* pConnectField, int uuid, void(*callback)(int, void*)) {
   UVConnectField* _pConnectField = new UVConnectField();
   memcpy(_pConnectField, pConnectField, sizeof(UVConnectField));
-  logger_cout("trader Connect this -> invoke");
+  logger_cout("[UV:Connect]");
   this->invoke(_pConnectField, T_CONNECT, callback, uuid);
 }
 void uv_trader::Disconnect() {
@@ -95,7 +95,7 @@ void uv_trader::Disconnect() {
     delete callback_it->second;
     callback_it++;
   }
-  logger_cout("uv_trader Disconnect------>object destroyed");
+  logger_cout("[UV:Disconnect]");
 }
 void uv_trader::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   CThostFtdcRspInfoField* _pRspInfo = NULL;
@@ -103,7 +103,7 @@ void uv_trader::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, boo
     _pRspInfo = new CThostFtdcRspInfoField();
     memcpy(_pRspInfo, pRspInfo, sizeof(CThostFtdcRspInfoField));
   }
-  std::string log = "uv_trader OnRspError------>";
+  std::string log = "[UV:OnRspError]";
   logger_cout(log.append("requestid:").append(to_string(nRequestID)).append(",islast:").append(to_string(bIsLast)).c_str());
   on_invoke(T_ONRSPERROR, _pRspInfo, pRspInfo, nRequestID, bIsLast);
 }
@@ -120,9 +120,6 @@ void uv_trader::_on_async(uv_work_t * work){
 }
 
 void uv_trader::_on_completed(uv_work_t * work,int){
-  std::string head = "uv_trader _on_completed  ==== ";
-  logger_cout(head.c_str());
-
   CbRtnField* cbTrnField = static_cast<CbRtnField*>(work->data);
   std::map<int, CbWrap*>::iterator it = cb_map.find(cbTrnField->eFlag);
   if (it != cb_map.end()) {
@@ -146,7 +143,7 @@ void uv_trader::invoke(void* field, int ret, void(*callback)(int, void*), int uu
 
   iRequestID = iRequestID+1;
   baton->iRequestID = iRequestID;
-  std::string head = "uv_trader invoke------>uuid:";
+  std::string head = "[UV:invoke]uuid:";
   logger_cout(head.append(to_string(uuid)).append(",requestid:").append(to_string(baton->iRequestID)).c_str());
   uv_queue_work(uv_default_loop(), &baton->work, _async, _completed);
 }
@@ -169,7 +166,7 @@ void uv_trader::on_invoke(int event_type, void* _stru, CThostFtdcRspInfoField *p
 void uv_trader::_async(uv_work_t * work) {
   LookupCtpApiBaton* baton = static_cast<LookupCtpApiBaton*>(work->data);
   uv_trader* uv_trader_obj = static_cast<uv_trader*>(baton->uv_trader_obj);
-  std::string log = "uv_trader _async------>";
+  std::string log = "[UV:Async]";
   logger_cout(log.append(to_string(baton->fun)).c_str());
   switch (baton->fun) {
   case T_CONNECT:
@@ -247,7 +244,7 @@ void uv_trader::${reqFunc[0]}(${reqFunc[1]}, void(*callback)(int, void*)) {
     rpl_1 += `void uv_trader::${resFunc[0]}(${resFunc[1]}) {\n`
     if (resFunc[0] === 'OnFrontConnected') {
       rpl_1 += `
-  logger_cout("uv_trader OnFrontConnected");
+  logger_cout("[UV] OnFrontConnected: ");
   CbRtnField* field = new CbRtnField();
   field->eFlag = ${cb_enum};
   field->work.data = field;
@@ -255,7 +252,7 @@ void uv_trader::${reqFunc[0]}(${reqFunc[1]}, void(*callback)(int, void*)) {
 `
     } else if (resFunc[0] === 'OnFrontDisconnected') {
       rpl_1 += `
-  std::string log = "uv_trader OnFrontDisconnected------>";
+  std::string log = "[UV] OnFrontDisconnected: ";
   logger_cout(log.append("nReason:").append(to_string(nReason)).c_str());
   CbRtnField* field = new CbRtnField();
   field->eFlag = ${cb_enum};
@@ -265,7 +262,7 @@ void uv_trader::${reqFunc[0]}(${reqFunc[1]}, void(*callback)(int, void*)) {
 `
     } else if (resFunc[0] === 'OnHeartBeatWarning') {
       rpl_1 += `
-  std::string log = "uv_trader OnHeartBeatWarning------>";
+  std::string log = "[UV] OnHeartBeatWarning: ";
   logger_cout(log.append("nTimeLapse:").append(to_string(nTimeLapse)).c_str());
   CbRtnField* field = new CbRtnField();
   field->eFlag = ${cb_enum};
@@ -277,7 +274,7 @@ void uv_trader::${reqFunc[0]}(${reqFunc[1]}, void(*callback)(int, void*)) {
       const CTHostFtdcField = params[0]
       const CTHostFtdcFieldType = CTHostFtdcField.split(' ')[0]
       const CTHostFtdcFieldValue = CTHostFtdcField.split(' ')[1].replace('*', '')
-      rpl_1 += `  std::string log = "uv_trader ${resFunc[0]}------>";`
+      rpl_1 += `  std::string log = "[UV] ${resFunc[0]}------>";`
       if (params.length === 1) {
         rpl_1 += `
   logger_cout(log.c_str());

@@ -8,16 +8,13 @@ std::map<int, Persistent<Function> > CTPTrader::callback_map;
 std::map<int, Persistent<Function> > CTPTrader::fun_rtncb_map;
 
 CTPTrader::CTPTrader(void) {
-  logger_cout("ctp_trader------>object start init");
   uvTrader = new uv_trader();
-  logger_cout("ctp_trader------>object init successed");
 }
 
 CTPTrader::~CTPTrader(void) {
   if (uvTrader) {
     delete uvTrader;
   }
-  logger_cout("ctp_trader------>object destroyed");
 }
 
 void CTPTrader::New(const FunctionCallbackInfo <Value> &args) {
@@ -268,8 +265,6 @@ void CTPTrader::GetTradingDay(const FunctionCallbackInfo <Value> &args) {
 
   CTPTrader *wTrader = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
   const char *tradingDay = wTrader->uvTrader->GetTradingDay();
-  logger_cout("GetTradingDay:");
-  logger_cout(tradingDay);
 
   args.GetReturnValue().Set(String::NewFromUtf8(isolate, tradingDay));
 }
@@ -278,9 +273,9 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   if (args[0]->IsUndefined() || args[1]->IsUndefined()) {
-    logger_cout("Wrong arguments->event name or function");
+    logger_cout("[TRADER] Wrong arguments->event name or function");
     isolate->ThrowException(
-            Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->event name or function")));
+            Exception::TypeError(String::NewFromUtf8(isolate, "[TRADER] Wrong arguments->event name or function")));
     return;
   }
 
@@ -293,7 +288,7 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
 
   std::map<std::string, int>::iterator eIt = event_map.find((std::string) * eNameAscii);
   if (eIt == event_map.end()) {
-    logger_cout("System has not register this event");
+    logger_cout("[TRADER] System has not register this event");
     isolate->ThrowException(
             Exception::TypeError(String::NewFromUtf8(isolate, "System has no register this event")));
     return;
@@ -302,7 +297,7 @@ void CTPTrader::On(const FunctionCallbackInfo <Value> &args) {
   std::map < int, Persistent < Function > > ::iterator
   cIt = callback_map.find(eIt->second);
   if (cIt != callback_map.end()) {
-    logger_cout("Callback is defined before");
+    logger_cout("[TRADER] Callback is defined before");
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Callback is defined before")));
     return;
   }
@@ -316,12 +311,12 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   if (args[0]->IsUndefined()) {
-    logger_cout("Wrong arguments->front addr");
+    logger_cout("[TRADER] Wrong arguments->front addr");
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->front addr")));
     return;
   }
   if (!args[2]->IsNumber() || !args[3]->IsNumber()) {
-    logger_cout("Wrong arguments->public or private topic type");
+    logger_cout("[TRADER] Wrong arguments->public or private topic type");
     isolate->ThrowException(
             Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->public or private topic type")));
     return;
@@ -331,7 +326,6 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   if (!args[4]->IsUndefined() && args[4]->IsFunction()) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[4]));
-    logger_cout(to_string(uuid).append("|uuid").c_str());
   }
 
   Local <String> frontAddr = args[0]->ToString();
@@ -347,10 +341,6 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
   strcpy(pConnectField.szPath, ((std::string) * pathUtf8).c_str());
   pConnectField.public_topic_type = publicTopicType;
   pConnectField.private_topic_type = privateTopicType;
-  logger_cout(((std::string) * addrUtf8).append("|addrUtf8").c_str());
-  logger_cout(((std::string) * pathUtf8).append("|pathUtf8").c_str());
-  logger_cout(to_string(publicTopicType).append("|publicTopicType").c_str());
-  logger_cout(to_string(privateTopicType).append("|privateTopicType").c_str());
 
   obj->uvTrader->Connect(&pConnectField, uuid, FunRtnCallback);
   return args.GetReturnValue().Set(String::NewFromUtf8(isolate, "finish exec connect"));
@@ -358,2673 +348,2691 @@ void CTPTrader::Connect(const FunctionCallbackInfo <Value> &args) {
 
 void CTPTrader::ReqAuthenticate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqAuthenticate------>";
+  std::string log = "[TRADER] ReqAuthenticate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcReqAuthenticateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqAuthenticate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserProductInfo"), req.UserProductInfo);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AuthCode"), req.AuthCode);
 
-  CThostFtdcReqAuthenticateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserProductInfo"), req.UserProductInfo);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AuthCode"), req.AuthCode);
-
-  obj->uvTrader->ReqAuthenticate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqAuthenticate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqUserLogin(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqUserLogin------>";
+  std::string log = "[TRADER] ReqUserLogin------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcReqUserLoginField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqUserLogin(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserProductInfo"), req.UserProductInfo);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InterfaceProductInfo"), req.InterfaceProductInfo);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProtocolInfo"), req.ProtocolInfo);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OneTimePassword"), req.OneTimePassword);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientIPAddress"), req.ClientIPAddress);
 
-  CThostFtdcReqUserLoginField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserProductInfo"), req.UserProductInfo);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InterfaceProductInfo"), req.InterfaceProductInfo);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProtocolInfo"), req.ProtocolInfo);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OneTimePassword"), req.OneTimePassword);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientIPAddress"), req.ClientIPAddress);
-
-  obj->uvTrader->ReqUserLogin(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqUserLogin(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqUserLogout(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqUserLogout------>";
+  std::string log = "[TRADER] ReqUserLogout------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcUserLogoutField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqUserLogout(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
 
-  CThostFtdcUserLogoutField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-
-  obj->uvTrader->ReqUserLogout(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqUserLogout(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqUserPasswordUpdate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqUserPasswordUpdate------>";
+  std::string log = "[TRADER] ReqUserPasswordUpdate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcUserPasswordUpdateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqUserPasswordUpdate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OldPassword"), req.OldPassword);
+    setString(jsonObj, String::NewFromUtf8(isolate, "NewPassword"), req.NewPassword);
 
-  CThostFtdcUserPasswordUpdateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OldPassword"), req.OldPassword);
-  setString(jsonObj, String::NewFromUtf8(isolate, "NewPassword"), req.NewPassword);
-
-  obj->uvTrader->ReqUserPasswordUpdate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqUserPasswordUpdate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqTradingAccountPasswordUpdate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqTradingAccountPasswordUpdate------>";
+  std::string log = "[TRADER] ReqTradingAccountPasswordUpdate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcTradingAccountPasswordUpdateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqTradingAccountPasswordUpdate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OldPassword"), req.OldPassword);
+    setString(jsonObj, String::NewFromUtf8(isolate, "NewPassword"), req.NewPassword);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcTradingAccountPasswordUpdateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OldPassword"), req.OldPassword);
-  setString(jsonObj, String::NewFromUtf8(isolate, "NewPassword"), req.NewPassword);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqTradingAccountPasswordUpdate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqTradingAccountPasswordUpdate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqOrderInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqOrderInsert------>";
+  std::string log = "[TRADER] ReqOrderInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqOrderInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "OrderPriceType"), &req.OrderPriceType);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombOffsetFlag"), req.CombOffsetFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombHedgeFlag"), req.CombHedgeFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "LimitPrice"), &req.LimitPrice);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeTotalOriginal"), &req.VolumeTotalOriginal);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "TimeCondition"), &req.TimeCondition);
+    setString(jsonObj, String::NewFromUtf8(isolate, "GTDDate"), req.GTDDate);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "VolumeCondition"), &req.VolumeCondition);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "MinVolume"), &req.MinVolume);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ContingentCondition"), &req.ContingentCondition);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "StopPrice"), &req.StopPrice);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ForceCloseReason"), &req.ForceCloseReason);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "IsAutoSuspend"), &req.IsAutoSuspend);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "UserForceClose"), &req.UserForceClose);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "OrderPriceType"), &req.OrderPriceType);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombOffsetFlag"), req.CombOffsetFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombHedgeFlag"), req.CombHedgeFlag);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeTotalOriginal"), &req.VolumeTotalOriginal);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "TimeCondition"), &req.TimeCondition);
-  setString(jsonObj, String::NewFromUtf8(isolate, "GTDDate"), req.GTDDate);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "VolumeCondition"), &req.VolumeCondition);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "MinVolume"), &req.MinVolume);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ContingentCondition"), &req.ContingentCondition);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ForceCloseReason"), &req.ForceCloseReason);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "IsAutoSuspend"), &req.IsAutoSuspend);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "UserForceClose"), &req.UserForceClose);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqOrderInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqOrderInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqParkedOrderInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqParkedOrderInsert------>";
+  std::string log = "[TRADER] ReqParkedOrderInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcParkedOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqParkedOrderInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "OrderPriceType"), &req.OrderPriceType);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombOffsetFlag"), req.CombOffsetFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombHedgeFlag"), req.CombHedgeFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "LimitPrice"), &req.LimitPrice);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeTotalOriginal"), &req.VolumeTotalOriginal);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "TimeCondition"), &req.TimeCondition);
+    setString(jsonObj, String::NewFromUtf8(isolate, "GTDDate"), req.GTDDate);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "VolumeCondition"), &req.VolumeCondition);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "MinVolume"), &req.MinVolume);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ContingentCondition"), &req.ContingentCondition);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "StopPrice"), &req.StopPrice);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ForceCloseReason"), &req.ForceCloseReason);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "IsAutoSuspend"), &req.IsAutoSuspend);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "UserForceClose"), &req.UserForceClose);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderID"), req.ParkedOrderID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "UserType"), &req.UserType);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Status"), &req.Status);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcParkedOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "OrderPriceType"), &req.OrderPriceType);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombOffsetFlag"), req.CombOffsetFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombHedgeFlag"), req.CombHedgeFlag);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeTotalOriginal"), &req.VolumeTotalOriginal);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "TimeCondition"), &req.TimeCondition);
-  setString(jsonObj, String::NewFromUtf8(isolate, "GTDDate"), req.GTDDate);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "VolumeCondition"), &req.VolumeCondition);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "MinVolume"), &req.MinVolume);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ContingentCondition"), &req.ContingentCondition);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ForceCloseReason"), &req.ForceCloseReason);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "IsAutoSuspend"), &req.IsAutoSuspend);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "UserForceClose"), &req.UserForceClose);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderID"), req.ParkedOrderID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "UserType"), &req.UserType);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Status"), &req.Status);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "IsSwapOrder"), &req.IsSwapOrder);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqParkedOrderInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqParkedOrderInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqParkedOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqParkedOrderAction------>";
+  std::string log = "[TRADER] ReqParkedOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcParkedOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqParkedOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "LimitPrice"), &req.LimitPrice);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeChange"), &req.VolumeChange);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderActionID"), req.ParkedOrderActionID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "UserType"), &req.UserType);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Status"), &req.Status);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcParkedOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeChange"), &req.VolumeChange);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderActionID"), req.ParkedOrderActionID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "UserType"), &req.UserType);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Status"), &req.Status);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "ErrorID"), &req.ErrorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ErrorMsg"), req.ErrorMsg);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqParkedOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqParkedOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqOrderAction------>";
+  std::string log = "[TRADER] ReqOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "LimitPrice"), &req.LimitPrice);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeChange"), &req.VolumeChange);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderRef"), req.OrderRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "VolumeChange"), &req.VolumeChange);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQueryMaxOrderVolume(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQueryMaxOrderVolume------>";
+  std::string log = "[TRADER] ReqQueryMaxOrderVolume------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQueryMaxOrderVolumeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQueryMaxOrderVolume(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "OffsetFlag"), &req.OffsetFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "MaxVolume"), &req.MaxVolume);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQueryMaxOrderVolumeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "OffsetFlag"), &req.OffsetFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "MaxVolume"), &req.MaxVolume);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQueryMaxOrderVolume(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQueryMaxOrderVolume(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqSettlementInfoConfirm(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqSettlementInfoConfirm------>";
+  std::string log = "[TRADER] ReqSettlementInfoConfirm------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcSettlementInfoConfirmField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqSettlementInfoConfirm(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmDate"), req.ConfirmDate);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmTime"), req.ConfirmTime);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SettlementID"), &req.SettlementID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcSettlementInfoConfirmField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmDate"), req.ConfirmDate);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ConfirmTime"), req.ConfirmTime);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SettlementID"), &req.SettlementID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqSettlementInfoConfirm(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqSettlementInfoConfirm(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqRemoveParkedOrder(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqRemoveParkedOrder------>";
+  std::string log = "[TRADER] ReqRemoveParkedOrder------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcRemoveParkedOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqRemoveParkedOrder(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderID"), req.ParkedOrderID);
 
-  CThostFtdcRemoveParkedOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderID"), req.ParkedOrderID);
-
-  obj->uvTrader->ReqRemoveParkedOrder(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqRemoveParkedOrder(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqRemoveParkedOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqRemoveParkedOrderAction------>";
+  std::string log = "[TRADER] ReqRemoveParkedOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcRemoveParkedOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqRemoveParkedOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderActionID"), req.ParkedOrderActionID);
 
-  CThostFtdcRemoveParkedOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ParkedOrderActionID"), req.ParkedOrderActionID);
-
-  obj->uvTrader->ReqRemoveParkedOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqRemoveParkedOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqExecOrderInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqExecOrderInsert------>";
+  std::string log = "[TRADER] ReqExecOrderInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputExecOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqExecOrderInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderRef"), req.ExecOrderRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "OffsetFlag"), &req.OffsetFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionType"), &req.ActionType);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "PosiDirection"), &req.PosiDirection);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ReservePositionFlag"), &req.ReservePositionFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "CloseFlag"), &req.CloseFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputExecOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderRef"), req.ExecOrderRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "OffsetFlag"), &req.OffsetFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionType"), &req.ActionType);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "PosiDirection"), &req.PosiDirection);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ReservePositionFlag"), &req.ReservePositionFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "CloseFlag"), &req.CloseFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqExecOrderInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqExecOrderInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqExecOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqExecOrderAction------>";
+  std::string log = "[TRADER] ReqExecOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputExecOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqExecOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "ExecOrderActionRef"), &req.ExecOrderActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderRef"), req.ExecOrderRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderSysID"), req.ExecOrderSysID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputExecOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "ExecOrderActionRef"), &req.ExecOrderActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderRef"), req.ExecOrderRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderSysID"), req.ExecOrderSysID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqExecOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqExecOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqForQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqForQuoteInsert------>";
+  std::string log = "[TRADER] ReqForQuoteInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputForQuoteField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqForQuoteInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteRef"), req.ForQuoteRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputForQuoteField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteRef"), req.ForQuoteRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqForQuoteInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqForQuoteInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQuoteInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQuoteInsert------>";
+  std::string log = "[TRADER] ReqQuoteInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputQuoteField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQuoteInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "QuoteRef"), req.QuoteRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "AskPrice"), &req.AskPrice);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "BidPrice"), &req.BidPrice);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "AskVolume"), &req.AskVolume);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "BidVolume"), &req.BidVolume);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "AskOffsetFlag"), &req.AskOffsetFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BidOffsetFlag"), &req.BidOffsetFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "AskHedgeFlag"), &req.AskHedgeFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BidHedgeFlag"), &req.BidHedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AskOrderRef"), req.AskOrderRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BidOrderRef"), req.BidOrderRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteSysID"), req.ForQuoteSysID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputQuoteField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "QuoteRef"), req.QuoteRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "AskVolume"), &req.AskVolume);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "BidVolume"), &req.BidVolume);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "AskOffsetFlag"), &req.AskOffsetFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BidOffsetFlag"), &req.BidOffsetFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "AskHedgeFlag"), &req.AskHedgeFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BidHedgeFlag"), &req.BidHedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AskOrderRef"), req.AskOrderRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BidOrderRef"), req.BidOrderRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ForQuoteSysID"), req.ForQuoteSysID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqQuoteInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQuoteInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQuoteAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQuoteAction------>";
+  std::string log = "[TRADER] ReqQuoteAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputQuoteActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQuoteAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "QuoteActionRef"), &req.QuoteActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "QuoteRef"), req.QuoteRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "QuoteSysID"), req.QuoteSysID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputQuoteActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "QuoteActionRef"), &req.QuoteActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "QuoteRef"), req.QuoteRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "QuoteSysID"), req.QuoteSysID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqQuoteAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQuoteAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqBatchOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqBatchOrderAction------>";
+  std::string log = "[TRADER] ReqBatchOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputBatchOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqBatchOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputBatchOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "OrderActionRef"), &req.OrderActionRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqBatchOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqBatchOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqOptionSelfCloseInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqOptionSelfCloseInsert------>";
+  std::string log = "[TRADER] ReqOptionSelfCloseInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputOptionSelfCloseField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqOptionSelfCloseInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputOptionSelfCloseField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BusinessUnit"), req.BusinessUnit);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqOptionSelfCloseInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqOptionSelfCloseInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqOptionSelfCloseAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqOptionSelfCloseAction------>";
+  std::string log = "[TRADER] ReqOptionSelfCloseAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputOptionSelfCloseActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqOptionSelfCloseAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseActionRef"), &req.OptionSelfCloseActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputOptionSelfCloseActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseActionRef"), &req.OptionSelfCloseActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseRef"), req.OptionSelfCloseRef);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FrontID"), &req.FrontID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ActionFlag"), &req.ActionFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqOptionSelfCloseAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqOptionSelfCloseAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqCombActionInsert(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqCombActionInsert------>";
+  std::string log = "[TRADER] ReqCombActionInsert------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcInputCombActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqCombActionInsert(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombActionRef"), req.CombActionRef);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "CombDirection"), &req.CombDirection);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
+    setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
 
-  CThostFtdcInputCombActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombActionRef"), req.CombActionRef);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "Direction"), &req.Direction);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "Volume"), &req.Volume);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "CombDirection"), &req.CombDirection);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IPAddress"), req.IPAddress);
-  setString(jsonObj, String::NewFromUtf8(isolate, "MacAddress"), req.MacAddress);
-
-  obj->uvTrader->ReqCombActionInsert(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqCombActionInsert(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryOrder(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryOrder------>";
+  std::string log = "[TRADER] ReqQryOrder------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryOrder(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
-  CThostFtdcQryOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OrderSysID"), req.OrderSysID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
-
-  obj->uvTrader->ReqQryOrder(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryOrder(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTrade(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTrade------>";
+  std::string log = "[TRADER] ReqQryTrade------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTradeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTrade(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeID"), req.TradeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeTimeStart"), req.TradeTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeTimeEnd"), req.TradeTimeEnd);
 
-  CThostFtdcQryTradeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeID"), req.TradeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeTimeStart"), req.TradeTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeTimeEnd"), req.TradeTimeEnd);
-
-  obj->uvTrader->ReqQryTrade(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTrade(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestorPosition(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestorPosition------>";
+  std::string log = "[TRADER] ReqQryInvestorPosition------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestorPositionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestorPosition(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInvestorPositionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInvestorPosition(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestorPosition(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTradingAccount(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTradingAccount------>";
+  std::string log = "[TRADER] ReqQryTradingAccount------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTradingAccountField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTradingAccount(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
-  CThostFtdcQryTradingAccountField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-
-  obj->uvTrader->ReqQryTradingAccount(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTradingAccount(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestor(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestor------>";
+  std::string log = "[TRADER] ReqQryInvestor------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestorField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestor(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQryInvestorField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQryInvestor(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestor(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTradingCode(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTradingCode------>";
+  std::string log = "[TRADER] ReqQryTradingCode------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTradingCodeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTradingCode(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
 
-  CThostFtdcQryTradingCodeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ClientID"), req.ClientID);
-
-  obj->uvTrader->ReqQryTradingCode(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTradingCode(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInstrumentMarginRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInstrumentMarginRate------>";
+  std::string log = "[TRADER] ReqQryInstrumentMarginRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInstrumentMarginRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInstrumentMarginRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInstrumentMarginRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInstrumentMarginRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInstrumentMarginRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInstrumentCommissionRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInstrumentCommissionRate------>";
+  std::string log = "[TRADER] ReqQryInstrumentCommissionRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInstrumentCommissionRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInstrumentCommissionRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInstrumentCommissionRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInstrumentCommissionRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInstrumentCommissionRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryExchange(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryExchange------>";
+  std::string log = "[TRADER] ReqQryExchange------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryExchangeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryExchange(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryExchangeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryExchange(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryExchange(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryProduct(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryProduct------>";
+  std::string log = "[TRADER] ReqQryProduct------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryProductField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryProduct(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "ProductClass"), &req.ProductClass);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryProductField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "ProductClass"), &req.ProductClass);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryProduct(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryProduct(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInstrument(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInstrument------>";
+  std::string log = "[TRADER] ReqQryInstrument------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInstrumentField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInstrument(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeInstID"), req.ExchangeInstID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
 
-  CThostFtdcQryInstrumentField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeInstID"), req.ExchangeInstID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
-
-  obj->uvTrader->ReqQryInstrument(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInstrument(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryDepthMarketData(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryDepthMarketData------>";
+  std::string log = "[TRADER] ReqQryDepthMarketData------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryDepthMarketDataField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryDepthMarketData(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryDepthMarketDataField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryDepthMarketData(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryDepthMarketData(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQrySettlementInfo(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQrySettlementInfo------>";
+  std::string log = "[TRADER] ReqQrySettlementInfo------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQrySettlementInfoField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQrySettlementInfo(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcQrySettlementInfoField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqQrySettlementInfo(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQrySettlementInfo(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTransferBank(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTransferBank------>";
+  std::string log = "[TRADER] ReqQryTransferBank------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTransferBankField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTransferBank(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBrchID"), req.BankBrchID);
 
-  CThostFtdcQryTransferBankField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBrchID"), req.BankBrchID);
-
-  obj->uvTrader->ReqQryTransferBank(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTransferBank(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestorPositionDetail(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestorPositionDetail------>";
+  std::string log = "[TRADER] ReqQryInvestorPositionDetail------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestorPositionDetailField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestorPositionDetail(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInvestorPositionDetailField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInvestorPositionDetail(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestorPositionDetail(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryNotice(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryNotice------>";
+  std::string log = "[TRADER] ReqQryNotice------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryNoticeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryNotice(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
 
-  CThostFtdcQryNoticeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-
-  obj->uvTrader->ReqQryNotice(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryNotice(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQrySettlementInfoConfirm(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQrySettlementInfoConfirm------>";
+  std::string log = "[TRADER] ReqQrySettlementInfoConfirm------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQrySettlementInfoConfirmField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQrySettlementInfoConfirm(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcQrySettlementInfoConfirmField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqQrySettlementInfoConfirm(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQrySettlementInfoConfirm(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestorPositionCombineDetail(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestorPositionCombineDetail------>";
+  std::string log = "[TRADER] ReqQryInvestorPositionCombineDetail------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestorPositionCombineDetailField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestorPositionCombineDetail(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CombInstrumentID"), req.CombInstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInvestorPositionCombineDetailField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CombInstrumentID"), req.CombInstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInvestorPositionCombineDetail(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestorPositionCombineDetail(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryCFMMCTradingAccountKey(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryCFMMCTradingAccountKey------>";
+  std::string log = "[TRADER] ReqQryCFMMCTradingAccountKey------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryCFMMCTradingAccountKeyField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryCFMMCTradingAccountKey(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQryCFMMCTradingAccountKeyField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQryCFMMCTradingAccountKey(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryCFMMCTradingAccountKey(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryEWarrantOffset(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryEWarrantOffset------>";
+  std::string log = "[TRADER] ReqQryEWarrantOffset------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryEWarrantOffsetField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryEWarrantOffset(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
-  CThostFtdcQryEWarrantOffsetField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-
-  obj->uvTrader->ReqQryEWarrantOffset(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryEWarrantOffset(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestorProductGroupMargin(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestorProductGroupMargin------>";
+  std::string log = "[TRADER] ReqQryInvestorProductGroupMargin------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestorProductGroupMarginField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestorProductGroupMargin(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProductGroupID"), req.ProductGroupID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryInvestorProductGroupMarginField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProductGroupID"), req.ProductGroupID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryInvestorProductGroupMargin(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestorProductGroupMargin(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryExchangeMarginRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryExchangeMarginRate------>";
+  std::string log = "[TRADER] ReqQryExchangeMarginRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryExchangeMarginRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryExchangeMarginRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryExchangeMarginRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryExchangeMarginRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryExchangeMarginRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryExchangeMarginRateAdjust(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryExchangeMarginRateAdjust------>";
+  std::string log = "[TRADER] ReqQryExchangeMarginRateAdjust------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryExchangeMarginRateAdjustField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryExchangeMarginRateAdjust(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
 
-  CThostFtdcQryExchangeMarginRateAdjustField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-
-  obj->uvTrader->ReqQryExchangeMarginRateAdjust(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryExchangeMarginRateAdjust(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryExchangeRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryExchangeRate------>";
+  std::string log = "[TRADER] ReqQryExchangeRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryExchangeRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryExchangeRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "FromCurrencyID"), req.FromCurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ToCurrencyID"), req.ToCurrencyID);
 
-  CThostFtdcQryExchangeRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "FromCurrencyID"), req.FromCurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ToCurrencyID"), req.ToCurrencyID);
-
-  obj->uvTrader->ReqQryExchangeRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryExchangeRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQrySecAgentACIDMap(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQrySecAgentACIDMap------>";
+  std::string log = "[TRADER] ReqQrySecAgentACIDMap------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQrySecAgentACIDMapField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQrySecAgentACIDMap(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcQrySecAgentACIDMapField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqQrySecAgentACIDMap(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQrySecAgentACIDMap(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryProductExchRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryProductExchRate------>";
+  std::string log = "[TRADER] ReqQryProductExchRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryProductExchRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryProductExchRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryProductExchRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryProductExchRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryProductExchRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryProductGroup(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryProductGroup------>";
+  std::string log = "[TRADER] ReqQryProductGroup------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryProductGroupField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryProductGroup(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryProductGroupField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "ProductID"), req.ProductID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryProductGroup(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryProductGroup(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryMMInstrumentCommissionRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryMMInstrumentCommissionRate------>";
+  std::string log = "[TRADER] ReqQryMMInstrumentCommissionRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryMMInstrumentCommissionRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryMMInstrumentCommissionRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
-  CThostFtdcQryMMInstrumentCommissionRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-
-  obj->uvTrader->ReqQryMMInstrumentCommissionRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryMMInstrumentCommissionRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryMMOptionInstrCommRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryMMOptionInstrCommRate------>";
+  std::string log = "[TRADER] ReqQryMMOptionInstrCommRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryMMOptionInstrCommRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryMMOptionInstrCommRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
-  CThostFtdcQryMMOptionInstrCommRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-
-  obj->uvTrader->ReqQryMMOptionInstrCommRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryMMOptionInstrCommRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInstrumentOrderCommRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInstrumentOrderCommRate------>";
+  std::string log = "[TRADER] ReqQryInstrumentOrderCommRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInstrumentOrderCommRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInstrumentOrderCommRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
-  CThostFtdcQryInstrumentOrderCommRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-
-  obj->uvTrader->ReqQryInstrumentOrderCommRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInstrumentOrderCommRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQrySecAgentTradingAccount(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQrySecAgentTradingAccount------>";
+  std::string log = "[TRADER] ReqQrySecAgentTradingAccount------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTradingAccountField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQrySecAgentTradingAccount(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
-  CThostFtdcQryTradingAccountField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BizType"), &req.BizType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-
-  obj->uvTrader->ReqQrySecAgentTradingAccount(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQrySecAgentTradingAccount(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQrySecAgentCheckMode(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQrySecAgentCheckMode------>";
+  std::string log = "[TRADER] ReqQrySecAgentCheckMode------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQrySecAgentCheckModeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQrySecAgentCheckMode(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQrySecAgentCheckModeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQrySecAgentCheckMode(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQrySecAgentCheckMode(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryOptionInstrTradeCost(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryOptionInstrTradeCost------>";
+  std::string log = "[TRADER] ReqQryOptionInstrTradeCost------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryOptionInstrTradeCostField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryOptionInstrTradeCost(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "InputPrice"), &req.InputPrice);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "UnderlyingPrice"), &req.UnderlyingPrice);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryOptionInstrTradeCostField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "HedgeFlag"), &req.HedgeFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryOptionInstrTradeCost(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryOptionInstrTradeCost(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryOptionInstrCommRate(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryOptionInstrCommRate------>";
+  std::string log = "[TRADER] ReqQryOptionInstrCommRate------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryOptionInstrCommRateField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryOptionInstrCommRate(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryOptionInstrCommRateField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryOptionInstrCommRate(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryOptionInstrCommRate(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryExecOrder(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryExecOrder------>";
+  std::string log = "[TRADER] ReqQryExecOrder------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryExecOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryExecOrder(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderSysID"), req.ExecOrderSysID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
-  CThostFtdcQryExecOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExecOrderSysID"), req.ExecOrderSysID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
-
-  obj->uvTrader->ReqQryExecOrder(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryExecOrder(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryForQuote(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryForQuote------>";
+  std::string log = "[TRADER] ReqQryForQuote------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryForQuoteField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryForQuote(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
-  CThostFtdcQryForQuoteField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
-
-  obj->uvTrader->ReqQryForQuote(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryForQuote(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryQuote(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryQuote------>";
+  std::string log = "[TRADER] ReqQryQuote------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryQuoteField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryQuote(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "QuoteSysID"), req.QuoteSysID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
-  CThostFtdcQryQuoteField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "QuoteSysID"), req.QuoteSysID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
-
-  obj->uvTrader->ReqQryQuote(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryQuote(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryOptionSelfClose(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryOptionSelfClose------>";
+  std::string log = "[TRADER] ReqQryOptionSelfClose------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryOptionSelfCloseField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryOptionSelfClose(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
 
-  CThostFtdcQryOptionSelfCloseField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OptionSelfCloseSysID"), req.OptionSelfCloseSysID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeStart"), req.InsertTimeStart);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InsertTimeEnd"), req.InsertTimeEnd);
-
-  obj->uvTrader->ReqQryOptionSelfClose(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryOptionSelfClose(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryInvestUnit(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryInvestUnit------>";
+  std::string log = "[TRADER] ReqQryInvestUnit------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryInvestUnitField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryInvestUnit(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQryInvestUnitField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQryInvestUnit(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryInvestUnit(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryCombInstrumentGuard(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryCombInstrumentGuard------>";
+  std::string log = "[TRADER] ReqQryCombInstrumentGuard------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryCombInstrumentGuardField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryCombInstrumentGuard(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryCombInstrumentGuardField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryCombInstrumentGuard(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryCombInstrumentGuard(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryCombAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryCombAction------>";
+  std::string log = "[TRADER] ReqQryCombAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryCombActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryCombAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryCombActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryCombAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryCombAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTransferSerial(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTransferSerial------>";
+  std::string log = "[TRADER] ReqQryTransferSerial------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTransferSerialField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTransferSerial(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcQryTransferSerialField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqQryTransferSerial(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTransferSerial(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryAccountregister(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryAccountregister------>";
+  std::string log = "[TRADER] ReqQryAccountregister------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryAccountregisterField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryAccountregister(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
 
-  CThostFtdcQryAccountregisterField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-
-  obj->uvTrader->ReqQryAccountregister(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryAccountregister(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryContractBank(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryContractBank------>";
+  std::string log = "[TRADER] ReqQryContractBank------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryContractBankField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryContractBank(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBrchID"), req.BankBrchID);
 
-  CThostFtdcQryContractBankField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBrchID"), req.BankBrchID);
-
-  obj->uvTrader->ReqQryContractBank(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryContractBank(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryParkedOrder(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryParkedOrder------>";
+  std::string log = "[TRADER] ReqQryParkedOrder------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryParkedOrderField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryParkedOrder(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryParkedOrderField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryParkedOrder(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryParkedOrder(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryParkedOrderAction(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryParkedOrderAction------>";
+  std::string log = "[TRADER] ReqQryParkedOrderAction------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryParkedOrderActionField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryParkedOrderAction(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
 
-  CThostFtdcQryParkedOrderActionField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-
-  obj->uvTrader->ReqQryParkedOrderAction(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryParkedOrderAction(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryTradingNotice(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryTradingNotice------>";
+  std::string log = "[TRADER] ReqQryTradingNotice------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryTradingNoticeField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryTradingNotice(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQryTradingNoticeField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQryTradingNotice(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryTradingNotice(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryBrokerTradingParams(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryBrokerTradingParams------>";
+  std::string log = "[TRADER] ReqQryBrokerTradingParams------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryBrokerTradingParamsField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryBrokerTradingParams(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
 
-  CThostFtdcQryBrokerTradingParamsField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-
-  obj->uvTrader->ReqQryBrokerTradingParams(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryBrokerTradingParams(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQryBrokerTradingAlgos(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQryBrokerTradingAlgos------>";
+  std::string log = "[TRADER] ReqQryBrokerTradingAlgos------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQryBrokerTradingAlgosField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQryBrokerTradingAlgos(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
 
-  CThostFtdcQryBrokerTradingAlgosField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "ExchangeID"), req.ExchangeID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InstrumentID"), req.InstrumentID);
-
-  obj->uvTrader->ReqQryBrokerTradingAlgos(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQryBrokerTradingAlgos(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQueryCFMMCTradingAccountToken(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQueryCFMMCTradingAccountToken------>";
+  std::string log = "[TRADER] ReqQueryCFMMCTradingAccountToken------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcQueryCFMMCTradingAccountTokenField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQueryCFMMCTradingAccountToken(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
 
-  CThostFtdcQueryCFMMCTradingAccountTokenField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "InvestorID"), req.InvestorID);
-
-  obj->uvTrader->ReqQueryCFMMCTradingAccountToken(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQueryCFMMCTradingAccountToken(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqFromBankToFutureByFuture(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqFromBankToFutureByFuture------>";
+  std::string log = "[TRADER] ReqFromBankToFutureByFuture------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcReqTransferField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqFromBankToFutureByFuture(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "TradeAmount"), &req.TradeAmount);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "FutureFetchAmount"), &req.FutureFetchAmount);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "FeePayFlag"), &req.FeePayFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "CustFee"), &req.CustFee);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "BrokerFee"), &req.BrokerFee);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Message"), req.Message);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "TransferStatus"), &req.TransferStatus);
 
-  CThostFtdcReqTransferField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "FeePayFlag"), &req.FeePayFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Message"), req.Message);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "TransferStatus"), &req.TransferStatus);
-
-  obj->uvTrader->ReqFromBankToFutureByFuture(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqFromBankToFutureByFuture(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqFromFutureToBankByFuture(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqFromFutureToBankByFuture------>";
+  std::string log = "[TRADER] ReqFromFutureToBankByFuture------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcReqTransferField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqFromFutureToBankByFuture(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "TradeAmount"), &req.TradeAmount);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "FutureFetchAmount"), &req.FutureFetchAmount);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "FeePayFlag"), &req.FeePayFlag);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "CustFee"), &req.CustFee);
+    setDouble(jsonObj, String::NewFromUtf8(isolate, "BrokerFee"), &req.BrokerFee);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Message"), req.Message);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "TransferStatus"), &req.TransferStatus);
 
-  CThostFtdcReqTransferField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "FeePayFlag"), &req.FeePayFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Message"), req.Message);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "TransferStatus"), &req.TransferStatus);
-
-  obj->uvTrader->ReqFromFutureToBankByFuture(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqFromFutureToBankByFuture(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::ReqQueryBankAccountMoneyByFuture(const FunctionCallbackInfo <Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  std::string log = "ctp_trader ReqQueryBankAccountMoneyByFuture------>";
+  std::string log = "[TRADER] ReqQueryBankAccountMoneyByFuture------>";
 
- if(args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(
-    String::NewFromUtf8(isolate, "Error: Object arguments expected")));
-    return;
-  }
   int uuid = -1;
   CTPTrader *obj = ObjectWrap::Unwrap<CTPTrader>(args.Holder());
-  if (!args[1]->IsUndefined() && args[1]->IsFunction()) {
+  CThostFtdcReqQueryAccountField req;
+  memset(&req, 0, sizeof(req));
+
+  if (args.Length() == 0) {
+    obj->uvTrader->ReqQueryBankAccountMoneyByFuture(&req, uuid, FunRtnCallback);
+    return ;  
+  }
+  
+  if ((args.Length() == 1 && args[0]->IsFunction()) || (args.Length() == 2 && args[1]->IsFunction())) {
     uuid = ++s_uuid;
     fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[1]));
     std::string _head = std::string(log);
     logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
   }
+  if (args.Length() > 0 && args[0]->IsObject()) {
+    Local<Object> jsonObj = args[0]->ToObject();
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
+    setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
+    setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
+    setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
+    setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
+    setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
+    setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
+    setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
 
-  CThostFtdcReqQueryAccountField req;
-  memset(&req, 0, sizeof(req));
-
-  Local<Object> jsonObj = args[0]->ToObject();
-
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeCode"), req.TradeCode);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankID"), req.BankID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankBranchID"), req.BankBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerID"), req.BrokerID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerBranchID"), req.BrokerBranchID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeDate"), req.TradeDate);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradeTime"), req.TradeTime);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSerial"), req.BankSerial);
-  setString(jsonObj, String::NewFromUtf8(isolate, "TradingDay"), req.TradingDay);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "PlateSerial"), &req.PlateSerial);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "LastFragment"), &req.LastFragment);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "SessionID"), &req.SessionID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CustomerName"), req.CustomerName);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "IdCardType"), &req.IdCardType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "IdentifiedCardNo"), req.IdentifiedCardNo);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "CustType"), &req.CustType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankAccount"), req.BankAccount);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankPassWord"), req.BankPassWord);
-  setString(jsonObj, String::NewFromUtf8(isolate, "AccountID"), req.AccountID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Password"), req.Password);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "FutureSerial"), &req.FutureSerial);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "InstallID"), &req.InstallID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "UserID"), req.UserID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "VerifyCertNoFlag"), &req.VerifyCertNoFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "CurrencyID"), req.CurrencyID);
-  setString(jsonObj, String::NewFromUtf8(isolate, "Digest"), req.Digest);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankAccType"), &req.BankAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "DeviceID"), req.DeviceID);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankSecuAccType"), &req.BankSecuAccType);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BrokerIDByBank"), req.BrokerIDByBank);
-  setString(jsonObj, String::NewFromUtf8(isolate, "BankSecuAcc"), req.BankSecuAcc);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "BankPwdFlag"), &req.BankPwdFlag);
-  setChar(jsonObj, String::NewFromUtf8(isolate, "SecuPwdFlag"), &req.SecuPwdFlag);
-  setString(jsonObj, String::NewFromUtf8(isolate, "OperNo"), req.OperNo);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "RequestID"), &req.RequestID);
-  setInt(jsonObj, String::NewFromUtf8(isolate, "TID"), &req.TID);
-
-  obj->uvTrader->ReqQueryBankAccountMoneyByFuture(&req, uuid, FunRtnCallback);
-  return ;
+    obj->uvTrader->ReqQueryBankAccountMoneyByFuture(&req, uuid, FunRtnCallback);
+    return;
+  }
 }
 
 void CTPTrader::Disposed(const FunctionCallbackInfo <Value> &args) {
@@ -3042,7 +3050,7 @@ void CTPTrader::Disposed(const FunctionCallbackInfo <Value> &args) {
   fun_rtncb_map.clear();
   delete obj->uvTrader;
   obj->uvTrader = NULL;
-  logger_cout("wrap_trader Disposed------>wrap disposed");
+  logger_cout("[Trader Disposed]");
   return ;
 }
 
@@ -4037,12 +4045,14 @@ void CTPTrader::pkg_cb_onrsporderinsert(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pInputOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pInputOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pInputOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pInputOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pInputOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pInputOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pInputOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pInputOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pInputOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pInputOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pInputOrder->BusinessUnit));
@@ -4080,12 +4090,14 @@ void CTPTrader::pkg_cb_onrspparkedorderinsert(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pParkedOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pParkedOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pParkedOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pParkedOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pParkedOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pParkedOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pParkedOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pParkedOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pParkedOrder->BusinessUnit));
@@ -4129,6 +4141,7 @@ void CTPTrader::pkg_cb_onrspparkedorderaction(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pParkedOrderAction->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSysID"), String::NewFromUtf8(isolate, pParkedOrderAction->OrderSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pParkedOrderAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pParkedOrderAction->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeChange"), Number::New(isolate, pParkedOrderAction->VolumeChange));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pParkedOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pParkedOrderAction->InstrumentID));
@@ -4165,6 +4178,7 @@ void CTPTrader::pkg_cb_onrsporderaction(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInputOrderAction->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSysID"), String::NewFromUtf8(isolate, pInputOrderAction->OrderSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pInputOrderAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pInputOrderAction->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeChange"), Number::New(isolate, pInputOrderAction->VolumeChange));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputOrderAction->InstrumentID));
@@ -4366,6 +4380,8 @@ void CTPTrader::pkg_cb_onrspquoteinsert(CbRtnField *data, Local <Value> *cbArray
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputQuote->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteRef"), String::NewFromUtf8(isolate, pInputQuote->QuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputQuote->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice"), Number::New(isolate, pInputQuote->AskPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice"), Number::New(isolate, pInputQuote->BidPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume"), Number::New(isolate, pInputQuote->AskVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume"), Number::New(isolate, pInputQuote->BidVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pInputQuote->RequestID));
@@ -4552,12 +4568,14 @@ void CTPTrader::pkg_cb_onrspqryorder(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pOrder->BusinessUnit));
@@ -4634,6 +4652,7 @@ void CTPTrader::pkg_cb_onrspqrytrade(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeInstID"), String::NewFromUtf8(isolate, pTrade->ExchangeInstID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OffsetFlag"), String::NewFromUtf8(isolate, charto_string(pTrade->OffsetFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pTrade->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Price"), Number::New(isolate, pTrade->Price));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pTrade->Volume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeDate"), String::NewFromUtf8(isolate, pTrade->TradeDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeTime"), String::NewFromUtf8(isolate, pTrade->TradeTime));
@@ -4674,15 +4693,38 @@ void CTPTrader::pkg_cb_onrspqryinvestorposition(CbRtnField *data, Local <Value> 
     jsonRtn->Set(String::NewFromUtf8(isolate, "Position"), Number::New(isolate, pInvestorPosition->Position));
     jsonRtn->Set(String::NewFromUtf8(isolate, "LongFrozen"), Number::New(isolate, pInvestorPosition->LongFrozen));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ShortFrozen"), Number::New(isolate, pInvestorPosition->ShortFrozen));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongFrozenAmount"), Number::New(isolate, pInvestorPosition->LongFrozenAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortFrozenAmount"), Number::New(isolate, pInvestorPosition->ShortFrozenAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OpenVolume"), Number::New(isolate, pInvestorPosition->OpenVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CloseVolume"), Number::New(isolate, pInvestorPosition->CloseVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenAmount"), Number::New(isolate, pInvestorPosition->OpenAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseAmount"), Number::New(isolate, pInvestorPosition->CloseAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionCost"), Number::New(isolate, pInvestorPosition->PositionCost));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreMargin"), Number::New(isolate, pInvestorPosition->PreMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UseMargin"), Number::New(isolate, pInvestorPosition->UseMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenMargin"), Number::New(isolate, pInvestorPosition->FrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCash"), Number::New(isolate, pInvestorPosition->FrozenCash));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCommission"), Number::New(isolate, pInvestorPosition->FrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CashIn"), Number::New(isolate, pInvestorPosition->CashIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Commission"), Number::New(isolate, pInvestorPosition->Commission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfit"), Number::New(isolate, pInvestorPosition->CloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfit"), Number::New(isolate, pInvestorPosition->PositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreSettlementPrice"), Number::New(isolate, pInvestorPosition->PreSettlementPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementPrice"), Number::New(isolate, pInvestorPosition->SettlementPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pInvestorPosition->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pInvestorPosition->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenCost"), Number::New(isolate, pInvestorPosition->OpenCost));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeMargin"), Number::New(isolate, pInvestorPosition->ExchangeMargin));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombPosition"), Number::New(isolate, pInvestorPosition->CombPosition));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombLongFrozen"), Number::New(isolate, pInvestorPosition->CombLongFrozen));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombShortFrozen"), Number::New(isolate, pInvestorPosition->CombShortFrozen));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfitByDate"), Number::New(isolate, pInvestorPosition->CloseProfitByDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfitByTrade"), Number::New(isolate, pInvestorPosition->CloseProfitByTrade));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TodayPosition"), Number::New(isolate, pInvestorPosition->TodayPosition));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByMoney"), Number::New(isolate, pInvestorPosition->MarginRateByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByVolume"), Number::New(isolate, pInvestorPosition->MarginRateByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeFrozen"), Number::New(isolate, pInvestorPosition->StrikeFrozen));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeFrozenAmount"), Number::New(isolate, pInvestorPosition->StrikeFrozenAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AbandonFrozen"), Number::New(isolate, pInvestorPosition->AbandonFrozen));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInvestorPosition->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "YdStrikeFrozen"), Number::New(isolate, pInvestorPosition->YdStrikeFrozen));
@@ -4704,10 +4746,53 @@ void CTPTrader::pkg_cb_onrspqrytradingaccount(CbRtnField *data, Local <Value> *c
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pTradingAccount->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pTradingAccount->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreMortgage"), Number::New(isolate, pTradingAccount->PreMortgage));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreCredit"), Number::New(isolate, pTradingAccount->PreCredit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreDeposit"), Number::New(isolate, pTradingAccount->PreDeposit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreBalance"), Number::New(isolate, pTradingAccount->PreBalance));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreMargin"), Number::New(isolate, pTradingAccount->PreMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InterestBase"), Number::New(isolate, pTradingAccount->InterestBase));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Interest"), Number::New(isolate, pTradingAccount->Interest));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Deposit"), Number::New(isolate, pTradingAccount->Deposit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Withdraw"), Number::New(isolate, pTradingAccount->Withdraw));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenMargin"), Number::New(isolate, pTradingAccount->FrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCash"), Number::New(isolate, pTradingAccount->FrozenCash));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCommission"), Number::New(isolate, pTradingAccount->FrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrMargin"), Number::New(isolate, pTradingAccount->CurrMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CashIn"), Number::New(isolate, pTradingAccount->CashIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Commission"), Number::New(isolate, pTradingAccount->Commission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfit"), Number::New(isolate, pTradingAccount->CloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfit"), Number::New(isolate, pTradingAccount->PositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Balance"), Number::New(isolate, pTradingAccount->Balance));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Available"), Number::New(isolate, pTradingAccount->Available));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "WithdrawQuota"), Number::New(isolate, pTradingAccount->WithdrawQuota));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Reserve"), Number::New(isolate, pTradingAccount->Reserve));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pTradingAccount->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pTradingAccount->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Credit"), Number::New(isolate, pTradingAccount->Credit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Mortgage"), Number::New(isolate, pTradingAccount->Mortgage));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeMargin"), Number::New(isolate, pTradingAccount->ExchangeMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "DeliveryMargin"), Number::New(isolate, pTradingAccount->DeliveryMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeDeliveryMargin"), Number::New(isolate, pTradingAccount->ExchangeDeliveryMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ReserveBalance"), Number::New(isolate, pTradingAccount->ReserveBalance));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pTradingAccount->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreFundMortgageIn"), Number::New(isolate, pTradingAccount->PreFundMortgageIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreFundMortgageOut"), Number::New(isolate, pTradingAccount->PreFundMortgageOut));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageIn"), Number::New(isolate, pTradingAccount->FundMortgageIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageOut"), Number::New(isolate, pTradingAccount->FundMortgageOut));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageAvailable"), Number::New(isolate, pTradingAccount->FundMortgageAvailable));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MortgageableFund"), Number::New(isolate, pTradingAccount->MortgageableFund));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductMargin"), Number::New(isolate, pTradingAccount->SpecProductMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductFrozenMargin"), Number::New(isolate, pTradingAccount->SpecProductFrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductCommission"), Number::New(isolate, pTradingAccount->SpecProductCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductFrozenCommission"), Number::New(isolate, pTradingAccount->SpecProductFrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductPositionProfit"), Number::New(isolate, pTradingAccount->SpecProductPositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductCloseProfit"), Number::New(isolate, pTradingAccount->SpecProductCloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductPositionProfitByAlg"), Number::New(isolate, pTradingAccount->SpecProductPositionProfitByAlg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductExchangeMargin"), Number::New(isolate, pTradingAccount->SpecProductExchangeMargin));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BizType"), String::NewFromUtf8(isolate, charto_string(pTradingAccount->BizType).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenSwap"), Number::New(isolate, pTradingAccount->FrozenSwap));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RemainSwap"), Number::New(isolate, pTradingAccount->RemainSwap));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4781,6 +4866,10 @@ void CTPTrader::pkg_cb_onrspqryinstrumentmarginrate(CbRtnField *data, Local <Val
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInstrumentMarginRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInstrumentMarginRate->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInstrumentMarginRate->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByMoney"), Number::New(isolate, pInstrumentMarginRate->LongMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByVolume"), Number::New(isolate, pInstrumentMarginRate->LongMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByMoney"), Number::New(isolate, pInstrumentMarginRate->ShortMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByVolume"), Number::New(isolate, pInstrumentMarginRate->ShortMarginRatioByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsRelative"), Number::New(isolate, pInstrumentMarginRate->IsRelative));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInstrumentMarginRate->ExchangeID));
     *cbArray = jsonRtn;
@@ -4803,6 +4892,12 @@ void CTPTrader::pkg_cb_onrspqryinstrumentcommissionrate(CbRtnField *data, Local 
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pInstrumentCommissionRate->InvestorRange).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInstrumentCommissionRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInstrumentCommissionRate->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByMoney"), Number::New(isolate, pInstrumentCommissionRate->OpenRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByVolume"), Number::New(isolate, pInstrumentCommissionRate->OpenRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByMoney"), Number::New(isolate, pInstrumentCommissionRate->CloseRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByVolume"), Number::New(isolate, pInstrumentCommissionRate->CloseRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByMoney"), Number::New(isolate, pInstrumentCommissionRate->CloseTodayRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByVolume"), Number::New(isolate, pInstrumentCommissionRate->CloseTodayRatioByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInstrumentCommissionRate->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BizType"), String::NewFromUtf8(isolate, charto_string(pInstrumentCommissionRate->BizType).c_str()));
     *cbArray = jsonRtn;
@@ -4845,6 +4940,7 @@ void CTPTrader::pkg_cb_onrspqryproduct(CbRtnField *data, Local <Value> *cbArray)
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pProduct->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ProductClass"), String::NewFromUtf8(isolate, charto_string(pProduct->ProductClass).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeMultiple"), Number::New(isolate, pProduct->VolumeMultiple));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PriceTick"), Number::New(isolate, pProduct->PriceTick));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MaxMarketOrderVolume"), Number::New(isolate, pProduct->MaxMarketOrderVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinMarketOrderVolume"), Number::New(isolate, pProduct->MinMarketOrderVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MaxLimitOrderVolume"), Number::New(isolate, pProduct->MaxLimitOrderVolume));
@@ -4855,6 +4951,7 @@ void CTPTrader::pkg_cb_onrspqryproduct(CbRtnField *data, Local <Value> *cbArray)
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeCurrencyID"), String::NewFromUtf8(isolate, pProduct->TradeCurrencyID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MortgageFundUseRange"), String::NewFromUtf8(isolate, charto_string(pProduct->MortgageFundUseRange).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeProductID"), String::NewFromUtf8(isolate, pProduct->ExchangeProductID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UnderlyingMultiple"), Number::New(isolate, pProduct->UnderlyingMultiple));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -4884,6 +4981,7 @@ void CTPTrader::pkg_cb_onrspqryinstrument(CbRtnField *data, Local <Value> *cbArr
     jsonRtn->Set(String::NewFromUtf8(isolate, "MaxLimitOrderVolume"), Number::New(isolate, pInstrument->MaxLimitOrderVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinLimitOrderVolume"), Number::New(isolate, pInstrument->MinLimitOrderVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeMultiple"), Number::New(isolate, pInstrument->VolumeMultiple));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PriceTick"), Number::New(isolate, pInstrument->PriceTick));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CreateDate"), String::NewFromUtf8(isolate, pInstrument->CreateDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OpenDate"), String::NewFromUtf8(isolate, pInstrument->OpenDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExpireDate"), String::NewFromUtf8(isolate, pInstrument->ExpireDate));
@@ -4893,9 +4991,13 @@ void CTPTrader::pkg_cb_onrspqryinstrument(CbRtnField *data, Local <Value> *cbArr
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsTrading"), Number::New(isolate, pInstrument->IsTrading));
     jsonRtn->Set(String::NewFromUtf8(isolate, "PositionType"), String::NewFromUtf8(isolate, charto_string(pInstrument->PositionType).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "PositionDateType"), String::NewFromUtf8(isolate, charto_string(pInstrument->PositionDateType).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatio"), Number::New(isolate, pInstrument->LongMarginRatio));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatio"), Number::New(isolate, pInstrument->ShortMarginRatio));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MaxMarginSideAlgorithm"), String::NewFromUtf8(isolate, charto_string(pInstrument->MaxMarginSideAlgorithm).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UnderlyingInstrID"), String::NewFromUtf8(isolate, pInstrument->UnderlyingInstrID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikePrice"), Number::New(isolate, pInstrument->StrikePrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OptionsType"), String::NewFromUtf8(isolate, charto_string(pInstrument->OptionsType).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UnderlyingMultiple"), Number::New(isolate, pInstrument->UnderlyingMultiple));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombinationType"), String::NewFromUtf8(isolate, charto_string(pInstrument->CombinationType).c_str()));
     *cbArray = jsonRtn;
   } else {
@@ -4917,19 +5019,45 @@ void CTPTrader::pkg_cb_onrspqrydepthmarketdata(CbRtnField *data, Local <Value> *
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pDepthMarketData->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pDepthMarketData->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeInstID"), String::NewFromUtf8(isolate, pDepthMarketData->ExchangeInstID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LastPrice"), Number::New(isolate, pDepthMarketData->LastPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreSettlementPrice"), Number::New(isolate, pDepthMarketData->PreSettlementPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreClosePrice"), Number::New(isolate, pDepthMarketData->PreClosePrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreOpenInterest"), Number::New(isolate, pDepthMarketData->PreOpenInterest));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenPrice"), Number::New(isolate, pDepthMarketData->OpenPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "HighestPrice"), Number::New(isolate, pDepthMarketData->HighestPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LowestPrice"), Number::New(isolate, pDepthMarketData->LowestPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pDepthMarketData->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Turnover"), Number::New(isolate, pDepthMarketData->Turnover));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenInterest"), Number::New(isolate, pDepthMarketData->OpenInterest));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ClosePrice"), Number::New(isolate, pDepthMarketData->ClosePrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementPrice"), Number::New(isolate, pDepthMarketData->SettlementPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UpperLimitPrice"), Number::New(isolate, pDepthMarketData->UpperLimitPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LowerLimitPrice"), Number::New(isolate, pDepthMarketData->LowerLimitPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreDelta"), Number::New(isolate, pDepthMarketData->PreDelta));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrDelta"), Number::New(isolate, pDepthMarketData->CurrDelta));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UpdateTime"), String::NewFromUtf8(isolate, pDepthMarketData->UpdateTime));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UpdateMillisec"), Number::New(isolate, pDepthMarketData->UpdateMillisec));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice1"), Number::New(isolate, pDepthMarketData->BidPrice1));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume1"), Number::New(isolate, pDepthMarketData->BidVolume1));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice1"), Number::New(isolate, pDepthMarketData->AskPrice1));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume1"), Number::New(isolate, pDepthMarketData->AskVolume1));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice2"), Number::New(isolate, pDepthMarketData->BidPrice2));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume2"), Number::New(isolate, pDepthMarketData->BidVolume2));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice2"), Number::New(isolate, pDepthMarketData->AskPrice2));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume2"), Number::New(isolate, pDepthMarketData->AskVolume2));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice3"), Number::New(isolate, pDepthMarketData->BidPrice3));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume3"), Number::New(isolate, pDepthMarketData->BidVolume3));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice3"), Number::New(isolate, pDepthMarketData->AskPrice3));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume3"), Number::New(isolate, pDepthMarketData->AskVolume3));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice4"), Number::New(isolate, pDepthMarketData->BidPrice4));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume4"), Number::New(isolate, pDepthMarketData->BidVolume4));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice4"), Number::New(isolate, pDepthMarketData->AskPrice4));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume4"), Number::New(isolate, pDepthMarketData->AskVolume4));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice5"), Number::New(isolate, pDepthMarketData->BidPrice5));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume5"), Number::New(isolate, pDepthMarketData->BidVolume5));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice5"), Number::New(isolate, pDepthMarketData->AskPrice5));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume5"), Number::New(isolate, pDepthMarketData->AskVolume5));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AveragePrice"), Number::New(isolate, pDepthMarketData->AveragePrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionDay"), String::NewFromUtf8(isolate, pDepthMarketData->ActionDay));
     *cbArray = jsonRtn;
   } else {
@@ -4999,12 +5127,24 @@ void CTPTrader::pkg_cb_onrspqryinvestorpositiondetail(CbRtnField *data, Local <V
     jsonRtn->Set(String::NewFromUtf8(isolate, "OpenDate"), String::NewFromUtf8(isolate, pInvestorPositionDetail->OpenDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeID"), String::NewFromUtf8(isolate, pInvestorPositionDetail->TradeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pInvestorPositionDetail->Volume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenPrice"), Number::New(isolate, pInvestorPositionDetail->OpenPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pInvestorPositionDetail->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pInvestorPositionDetail->SettlementID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeType"), String::NewFromUtf8(isolate, charto_string(pInvestorPositionDetail->TradeType).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombInstrumentID"), String::NewFromUtf8(isolate, pInvestorPositionDetail->CombInstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInvestorPositionDetail->ExchangeID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfitByDate"), Number::New(isolate, pInvestorPositionDetail->CloseProfitByDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfitByTrade"), Number::New(isolate, pInvestorPositionDetail->CloseProfitByTrade));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfitByDate"), Number::New(isolate, pInvestorPositionDetail->PositionProfitByDate));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfitByTrade"), Number::New(isolate, pInvestorPositionDetail->PositionProfitByTrade));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Margin"), Number::New(isolate, pInvestorPositionDetail->Margin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchMargin"), Number::New(isolate, pInvestorPositionDetail->ExchMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByMoney"), Number::New(isolate, pInvestorPositionDetail->MarginRateByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByVolume"), Number::New(isolate, pInvestorPositionDetail->MarginRateByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LastSettlementPrice"), Number::New(isolate, pInvestorPositionDetail->LastSettlementPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementPrice"), Number::New(isolate, pInvestorPositionDetail->SettlementPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CloseVolume"), Number::New(isolate, pInvestorPositionDetail->CloseVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseAmount"), Number::New(isolate, pInvestorPositionDetail->CloseAmount));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5075,6 +5215,10 @@ void CTPTrader::pkg_cb_onrspqryinvestorpositioncombinedetail(CbRtnField *data, L
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInvestorPositionCombineDetail->HedgeFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pInvestorPositionCombineDetail->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TotalAmt"), Number::New(isolate, pInvestorPositionCombineDetail->TotalAmt));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Margin"), Number::New(isolate, pInvestorPositionCombineDetail->Margin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchMargin"), Number::New(isolate, pInvestorPositionCombineDetail->ExchMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByMoney"), Number::New(isolate, pInvestorPositionCombineDetail->MarginRateByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MarginRateByVolume"), Number::New(isolate, pInvestorPositionCombineDetail->MarginRateByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "LegID"), Number::New(isolate, pInvestorPositionCombineDetail->LegID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "LegMultiple"), Number::New(isolate, pInvestorPositionCombineDetail->LegMultiple));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombInstrumentID"), String::NewFromUtf8(isolate, pInvestorPositionCombineDetail->CombInstrumentID));
@@ -5145,6 +5289,27 @@ void CTPTrader::pkg_cb_onrspqryinvestorproductgroupmargin(CbRtnField *data, Loca
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInvestorProductGroupMargin->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pInvestorProductGroupMargin->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pInvestorProductGroupMargin->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenMargin"), Number::New(isolate, pInvestorProductGroupMargin->FrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongFrozenMargin"), Number::New(isolate, pInvestorProductGroupMargin->LongFrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortFrozenMargin"), Number::New(isolate, pInvestorProductGroupMargin->ShortFrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "UseMargin"), Number::New(isolate, pInvestorProductGroupMargin->UseMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongUseMargin"), Number::New(isolate, pInvestorProductGroupMargin->LongUseMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortUseMargin"), Number::New(isolate, pInvestorProductGroupMargin->ShortUseMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchMargin"), Number::New(isolate, pInvestorProductGroupMargin->ExchMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongExchMargin"), Number::New(isolate, pInvestorProductGroupMargin->LongExchMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortExchMargin"), Number::New(isolate, pInvestorProductGroupMargin->ShortExchMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfit"), Number::New(isolate, pInvestorProductGroupMargin->CloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCommission"), Number::New(isolate, pInvestorProductGroupMargin->FrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Commission"), Number::New(isolate, pInvestorProductGroupMargin->Commission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCash"), Number::New(isolate, pInvestorProductGroupMargin->FrozenCash));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CashIn"), Number::New(isolate, pInvestorProductGroupMargin->CashIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfit"), Number::New(isolate, pInvestorProductGroupMargin->PositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->OffsetAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongOffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->LongOffsetAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortOffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->ShortOffsetAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchOffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->ExchOffsetAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongExchOffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->LongExchOffsetAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortExchOffsetAmount"), Number::New(isolate, pInvestorProductGroupMargin->ShortExchOffsetAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInvestorProductGroupMargin->HedgeFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInvestorProductGroupMargin->ExchangeID));
     *cbArray = jsonRtn;
@@ -5166,6 +5331,10 @@ void CTPTrader::pkg_cb_onrspqryexchangemarginrate(CbRtnField *data, Local <Value
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pExchangeMarginRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pExchangeMarginRate->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pExchangeMarginRate->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRate->LongMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRate->LongMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRate->ShortMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRate->ShortMarginRatioByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pExchangeMarginRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5186,6 +5355,18 @@ void CTPTrader::pkg_cb_onrspqryexchangemarginrateadjust(CbRtnField *data, Local 
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pExchangeMarginRateAdjust->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pExchangeMarginRateAdjust->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pExchangeMarginRateAdjust->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->LongMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LongMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->LongMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->ShortMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ShortMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->ShortMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchLongMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->ExchLongMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchLongMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->ExchLongMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchShortMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->ExchShortMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchShortMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->ExchShortMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NoLongMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->NoLongMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NoLongMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->NoLongMarginRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NoShortMarginRatioByMoney"), Number::New(isolate, pExchangeMarginRateAdjust->NoShortMarginRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "NoShortMarginRatioByVolume"), Number::New(isolate, pExchangeMarginRateAdjust->NoShortMarginRatioByVolume));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5204,7 +5385,9 @@ void CTPTrader::pkg_cb_onrspqryexchangerate(CbRtnField *data, Local <Value> *cbA
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pExchangeRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FromCurrencyID"), String::NewFromUtf8(isolate, pExchangeRate->FromCurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FromCurrencyUnit"), Number::New(isolate, pExchangeRate->FromCurrencyUnit));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ToCurrencyID"), String::NewFromUtf8(isolate, pExchangeRate->ToCurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeRate"), Number::New(isolate, pExchangeRate->ExchangeRate));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5244,6 +5427,7 @@ void CTPTrader::pkg_cb_onrspqryproductexchrate(CbRtnField *data, Local <Value> *
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "ProductID"), String::NewFromUtf8(isolate, pProductExchRate->ProductID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteCurrencyID"), String::NewFromUtf8(isolate, pProductExchRate->QuoteCurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeRate"), Number::New(isolate, pProductExchRate->ExchangeRate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pProductExchRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5284,6 +5468,12 @@ void CTPTrader::pkg_cb_onrspqrymminstrumentcommissionrate(CbRtnField *data, Loca
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pMMInstrumentCommissionRate->InvestorRange).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pMMInstrumentCommissionRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pMMInstrumentCommissionRate->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByMoney"), Number::New(isolate, pMMInstrumentCommissionRate->OpenRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByVolume"), Number::New(isolate, pMMInstrumentCommissionRate->OpenRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByMoney"), Number::New(isolate, pMMInstrumentCommissionRate->CloseRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByVolume"), Number::New(isolate, pMMInstrumentCommissionRate->CloseRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByMoney"), Number::New(isolate, pMMInstrumentCommissionRate->CloseTodayRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByVolume"), Number::New(isolate, pMMInstrumentCommissionRate->CloseTodayRatioByVolume));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5304,6 +5494,14 @@ void CTPTrader::pkg_cb_onrspqrymmoptioninstrcommrate(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pMMOptionInstrCommRate->InvestorRange).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pMMOptionInstrCommRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pMMOptionInstrCommRate->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByMoney"), Number::New(isolate, pMMOptionInstrCommRate->OpenRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByVolume"), Number::New(isolate, pMMOptionInstrCommRate->OpenRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByMoney"), Number::New(isolate, pMMOptionInstrCommRate->CloseRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByVolume"), Number::New(isolate, pMMOptionInstrCommRate->CloseRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByMoney"), Number::New(isolate, pMMOptionInstrCommRate->CloseTodayRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByVolume"), Number::New(isolate, pMMOptionInstrCommRate->CloseTodayRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeRatioByMoney"), Number::New(isolate, pMMOptionInstrCommRate->StrikeRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeRatioByVolume"), Number::New(isolate, pMMOptionInstrCommRate->StrikeRatioByVolume));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5325,6 +5523,8 @@ void CTPTrader::pkg_cb_onrspqryinstrumentordercommrate(CbRtnField *data, Local <
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pInstrumentOrderCommRate->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OrderCommByVolume"), Number::New(isolate, pInstrumentOrderCommRate->OrderCommByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OrderActionCommByVolume"), Number::New(isolate, pInstrumentOrderCommRate->OrderActionCommByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pInstrumentOrderCommRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5344,10 +5544,53 @@ void CTPTrader::pkg_cb_onrspqrysecagenttradingaccount(CbRtnField *data, Local <V
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pTradingAccount->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AccountID"), String::NewFromUtf8(isolate, pTradingAccount->AccountID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreMortgage"), Number::New(isolate, pTradingAccount->PreMortgage));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreCredit"), Number::New(isolate, pTradingAccount->PreCredit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreDeposit"), Number::New(isolate, pTradingAccount->PreDeposit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreBalance"), Number::New(isolate, pTradingAccount->PreBalance));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreMargin"), Number::New(isolate, pTradingAccount->PreMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "InterestBase"), Number::New(isolate, pTradingAccount->InterestBase));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Interest"), Number::New(isolate, pTradingAccount->Interest));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Deposit"), Number::New(isolate, pTradingAccount->Deposit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Withdraw"), Number::New(isolate, pTradingAccount->Withdraw));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenMargin"), Number::New(isolate, pTradingAccount->FrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCash"), Number::New(isolate, pTradingAccount->FrozenCash));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenCommission"), Number::New(isolate, pTradingAccount->FrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CurrMargin"), Number::New(isolate, pTradingAccount->CurrMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CashIn"), Number::New(isolate, pTradingAccount->CashIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Commission"), Number::New(isolate, pTradingAccount->Commission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseProfit"), Number::New(isolate, pTradingAccount->CloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PositionProfit"), Number::New(isolate, pTradingAccount->PositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Balance"), Number::New(isolate, pTradingAccount->Balance));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Available"), Number::New(isolate, pTradingAccount->Available));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "WithdrawQuota"), Number::New(isolate, pTradingAccount->WithdrawQuota));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Reserve"), Number::New(isolate, pTradingAccount->Reserve));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"), String::NewFromUtf8(isolate, pTradingAccount->TradingDay));
     jsonRtn->Set(String::NewFromUtf8(isolate, "SettlementID"), Number::New(isolate, pTradingAccount->SettlementID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Credit"), Number::New(isolate, pTradingAccount->Credit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Mortgage"), Number::New(isolate, pTradingAccount->Mortgage));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeMargin"), Number::New(isolate, pTradingAccount->ExchangeMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "DeliveryMargin"), Number::New(isolate, pTradingAccount->DeliveryMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeDeliveryMargin"), Number::New(isolate, pTradingAccount->ExchangeDeliveryMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ReserveBalance"), Number::New(isolate, pTradingAccount->ReserveBalance));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pTradingAccount->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreFundMortgageIn"), Number::New(isolate, pTradingAccount->PreFundMortgageIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "PreFundMortgageOut"), Number::New(isolate, pTradingAccount->PreFundMortgageOut));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageIn"), Number::New(isolate, pTradingAccount->FundMortgageIn));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageOut"), Number::New(isolate, pTradingAccount->FundMortgageOut));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FundMortgageAvailable"), Number::New(isolate, pTradingAccount->FundMortgageAvailable));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MortgageableFund"), Number::New(isolate, pTradingAccount->MortgageableFund));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductMargin"), Number::New(isolate, pTradingAccount->SpecProductMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductFrozenMargin"), Number::New(isolate, pTradingAccount->SpecProductFrozenMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductCommission"), Number::New(isolate, pTradingAccount->SpecProductCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductFrozenCommission"), Number::New(isolate, pTradingAccount->SpecProductFrozenCommission));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductPositionProfit"), Number::New(isolate, pTradingAccount->SpecProductPositionProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductCloseProfit"), Number::New(isolate, pTradingAccount->SpecProductCloseProfit));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductPositionProfitByAlg"), Number::New(isolate, pTradingAccount->SpecProductPositionProfitByAlg));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "SpecProductExchangeMargin"), Number::New(isolate, pTradingAccount->SpecProductExchangeMargin));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BizType"), String::NewFromUtf8(isolate, charto_string(pTradingAccount->BizType).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FrozenSwap"), Number::New(isolate, pTradingAccount->FrozenSwap));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "RemainSwap"), Number::New(isolate, pTradingAccount->RemainSwap));
     *cbArray = jsonRtn;
   } else {
     *cbArray = Local<Value>::New(isolate, Undefined(isolate));
@@ -5389,6 +5632,11 @@ void CTPTrader::pkg_cb_onrspqryoptioninstrtradecost(CbRtnField *data, Local <Val
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pOptionInstrTradeCost->InvestorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pOptionInstrTradeCost->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pOptionInstrTradeCost->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FixedMargin"), Number::New(isolate, pOptionInstrTradeCost->FixedMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "MiniMargin"), Number::New(isolate, pOptionInstrTradeCost->MiniMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Royalty"), Number::New(isolate, pOptionInstrTradeCost->Royalty));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchFixedMargin"), Number::New(isolate, pOptionInstrTradeCost->ExchFixedMargin));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "ExchMiniMargin"), Number::New(isolate, pOptionInstrTradeCost->ExchMiniMargin));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOptionInstrTradeCost->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5410,6 +5658,14 @@ void CTPTrader::pkg_cb_onrspqryoptioninstrcommrate(CbRtnField *data, Local <Valu
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorRange"), String::NewFromUtf8(isolate, charto_string(pOptionInstrCommRate->InvestorRange).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pOptionInstrCommRate->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InvestorID"), String::NewFromUtf8(isolate, pOptionInstrCommRate->InvestorID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByMoney"), Number::New(isolate, pOptionInstrCommRate->OpenRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "OpenRatioByVolume"), Number::New(isolate, pOptionInstrCommRate->OpenRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByMoney"), Number::New(isolate, pOptionInstrCommRate->CloseRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseRatioByVolume"), Number::New(isolate, pOptionInstrCommRate->CloseRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByMoney"), Number::New(isolate, pOptionInstrCommRate->CloseTodayRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CloseTodayRatioByVolume"), Number::New(isolate, pOptionInstrCommRate->CloseTodayRatioByVolume));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeRatioByMoney"), Number::New(isolate, pOptionInstrCommRate->StrikeRatioByMoney));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StrikeRatioByVolume"), Number::New(isolate, pOptionInstrCommRate->StrikeRatioByVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOptionInstrCommRate->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5529,6 +5785,8 @@ void CTPTrader::pkg_cb_onrspqryquote(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pQuote->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteRef"), String::NewFromUtf8(isolate, pQuote->QuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pQuote->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice"), Number::New(isolate, pQuote->AskPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice"), Number::New(isolate, pQuote->BidPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume"), Number::New(isolate, pQuote->AskVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume"), Number::New(isolate, pQuote->BidVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pQuote->RequestID));
@@ -5667,6 +5925,7 @@ void CTPTrader::pkg_cb_onrspqrycombinstrumentguard(CbRtnField *data, Local <Valu
     Local <Object> jsonRtn = Object::New(isolate);
     jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->BrokerID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->InstrumentID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "GuarantRatio"), Number::New(isolate, pCombInstrumentGuard->GuarantRatio));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pCombInstrumentGuard->ExchangeID));
     *cbArray = jsonRtn;
   } else {
@@ -5749,6 +6008,9 @@ void CTPTrader::pkg_cb_onrspqrytransferserial(CbRtnField *data, Local <Value> *c
     jsonRtn->Set(String::NewFromUtf8(isolate, "IdCardType"), String::NewFromUtf8(isolate, charto_string(pTransferSerial->IdCardType).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IdentifiedCardNo"), String::NewFromUtf8(isolate, pTransferSerial->IdentifiedCardNo));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pTransferSerial->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pTransferSerial->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pTransferSerial->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pTransferSerial->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AvailabilityFlag"), String::NewFromUtf8(isolate, charto_string(pTransferSerial->AvailabilityFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OperatorCode"), String::NewFromUtf8(isolate, pTransferSerial->OperatorCode));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankNewAccount"), String::NewFromUtf8(isolate, pTransferSerial->BankNewAccount));
@@ -5812,12 +6074,14 @@ void CTPTrader::pkg_cb_onrtnorder(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pOrder->BusinessUnit));
@@ -5891,6 +6155,7 @@ void CTPTrader::pkg_cb_onrtntrade(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeInstID"), String::NewFromUtf8(isolate, pTrade->ExchangeInstID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OffsetFlag"), String::NewFromUtf8(isolate, charto_string(pTrade->OffsetFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "HedgeFlag"), String::NewFromUtf8(isolate, charto_string(pTrade->HedgeFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "Price"), Number::New(isolate, pTrade->Price));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Volume"), Number::New(isolate, pTrade->Volume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeDate"), String::NewFromUtf8(isolate, pTrade->TradeDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TradeTime"), String::NewFromUtf8(isolate, pTrade->TradeTime));
@@ -5927,12 +6192,14 @@ void CTPTrader::pkg_cb_onerrrtnorderinsert(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pInputOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pInputOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pInputOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pInputOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pInputOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pInputOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pInputOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pInputOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pInputOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pInputOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pInputOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pInputOrder->BusinessUnit));
@@ -5969,6 +6236,7 @@ void CTPTrader::pkg_cb_onerrrtnorderaction(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pOrderAction->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSysID"), String::NewFromUtf8(isolate, pOrderAction->OrderSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pOrderAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pOrderAction->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeChange"), Number::New(isolate, pOrderAction->VolumeChange));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionDate"), String::NewFromUtf8(isolate, pOrderAction->ActionDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionTime"), String::NewFromUtf8(isolate, pOrderAction->ActionTime));
@@ -6068,12 +6336,14 @@ void CTPTrader::pkg_cb_onrtnerrorconditionalorder(CbRtnField *data, Local <Value
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pErrorConditionalOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pErrorConditionalOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pErrorConditionalOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pErrorConditionalOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pErrorConditionalOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pErrorConditionalOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pErrorConditionalOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pErrorConditionalOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pErrorConditionalOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pErrorConditionalOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pErrorConditionalOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pErrorConditionalOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pErrorConditionalOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pErrorConditionalOrder->BusinessUnit));
@@ -6292,6 +6562,8 @@ void CTPTrader::pkg_cb_onrtnquote(CbRtnField *data, Local <Value> *cbArray) {
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pQuote->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteRef"), String::NewFromUtf8(isolate, pQuote->QuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pQuote->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice"), Number::New(isolate, pQuote->AskPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice"), Number::New(isolate, pQuote->BidPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume"), Number::New(isolate, pQuote->AskVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume"), Number::New(isolate, pQuote->BidVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pQuote->RequestID));
@@ -6352,6 +6624,8 @@ void CTPTrader::pkg_cb_onerrrtnquoteinsert(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pInputQuote->InstrumentID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteRef"), String::NewFromUtf8(isolate, pInputQuote->QuoteRef));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pInputQuote->UserID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "AskPrice"), Number::New(isolate, pInputQuote->AskPrice));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BidPrice"), Number::New(isolate, pInputQuote->BidPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "AskVolume"), Number::New(isolate, pInputQuote->AskVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BidVolume"), Number::New(isolate, pInputQuote->BidVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pInputQuote->RequestID));
@@ -6709,12 +6983,14 @@ void CTPTrader::pkg_cb_onrspqryparkedorder(CbRtnField *data, Local <Value> *cbAr
     jsonRtn->Set(String::NewFromUtf8(isolate, "Direction"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->Direction).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombOffsetFlag"), String::NewFromUtf8(isolate, pParkedOrder->CombOffsetFlag));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CombHedgeFlag"), String::NewFromUtf8(isolate, pParkedOrder->CombHedgeFlag));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pParkedOrder->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeTotalOriginal"), Number::New(isolate, pParkedOrder->VolumeTotalOriginal));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TimeCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->TimeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "GTDDate"), String::NewFromUtf8(isolate, pParkedOrder->GTDDate));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->VolumeCondition).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "MinVolume"), Number::New(isolate, pParkedOrder->MinVolume));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ContingentCondition"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->ContingentCondition).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "StopPrice"), Number::New(isolate, pParkedOrder->StopPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ForceCloseReason"), String::NewFromUtf8(isolate, charto_string(pParkedOrder->ForceCloseReason).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "IsAutoSuspend"), Number::New(isolate, pParkedOrder->IsAutoSuspend));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BusinessUnit"), String::NewFromUtf8(isolate, pParkedOrder->BusinessUnit));
@@ -6758,6 +7034,7 @@ void CTPTrader::pkg_cb_onrspqryparkedorderaction(CbRtnField *data, Local <Value>
     jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeID"), String::NewFromUtf8(isolate, pParkedOrderAction->ExchangeID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "OrderSysID"), String::NewFromUtf8(isolate, pParkedOrderAction->OrderSysID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ActionFlag"), String::NewFromUtf8(isolate, charto_string(pParkedOrderAction->ActionFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "LimitPrice"), Number::New(isolate, pParkedOrderAction->LimitPrice));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VolumeChange"), Number::New(isolate, pParkedOrderAction->VolumeChange));
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pParkedOrderAction->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "InstrumentID"), String::NewFromUtf8(isolate, pParkedOrderAction->InstrumentID));
@@ -6897,7 +7174,11 @@ void CTPTrader::pkg_cb_onrtnfrombanktofuturebybank(CbRtnField *data, Local <Valu
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->BankAccType).c_str()));
@@ -6951,7 +7232,11 @@ void CTPTrader::pkg_cb_onrtnfromfuturetobankbybank(CbRtnField *data, Local <Valu
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->BankAccType).c_str()));
@@ -7012,7 +7297,11 @@ void CTPTrader::pkg_cb_onrtnrepealfrombanktofuturebybank(CbRtnField *data, Local
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7073,7 +7362,11 @@ void CTPTrader::pkg_cb_onrtnrepealfromfuturetobankbybank(CbRtnField *data, Local
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7127,7 +7420,11 @@ void CTPTrader::pkg_cb_onrtnfrombanktofuturebyfuture(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->BankAccType).c_str()));
@@ -7181,7 +7478,11 @@ void CTPTrader::pkg_cb_onrtnfromfuturetobankbyfuture(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspTransfer->BankAccType).c_str()));
@@ -7242,7 +7543,11 @@ void CTPTrader::pkg_cb_onrtnrepealfrombanktofuturebyfuturemanual(CbRtnField *dat
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7303,7 +7608,11 @@ void CTPTrader::pkg_cb_onrtnrepealfromfuturetobankbyfuturemanual(CbRtnField *dat
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7368,6 +7677,8 @@ void CTPTrader::pkg_cb_onrtnquerybankbalancebyfuture(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "OperNo"), String::NewFromUtf8(isolate, pNotifyQueryAccount->OperNo));
     jsonRtn->Set(String::NewFromUtf8(isolate, "RequestID"), Number::New(isolate, pNotifyQueryAccount->RequestID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "TID"), Number::New(isolate, pNotifyQueryAccount->TID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BankUseAmount"), Number::New(isolate, pNotifyQueryAccount->BankUseAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BankFetchAmount"), Number::New(isolate, pNotifyQueryAccount->BankFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"), Number::New(isolate, pNotifyQueryAccount->ErrorID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), String::NewFromUtf8(isolate, pNotifyQueryAccount->ErrorMsg));
     *cbArray = jsonRtn;
@@ -7408,7 +7719,11 @@ void CTPTrader::pkg_cb_onerrrtnbanktofuturebyfuture(CbRtnField *data, Local <Val
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->BankAccType).c_str()));
@@ -7461,7 +7776,11 @@ void CTPTrader::pkg_cb_onerrrtnfuturetobankbyfuture(CbRtnField *data, Local <Val
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->BankAccType).c_str()));
@@ -7521,7 +7840,11 @@ void CTPTrader::pkg_cb_onerrrtnrepealbanktofuturebyfuturemanual(CbRtnField *data
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->BankAccType).c_str()));
@@ -7581,7 +7904,11 @@ void CTPTrader::pkg_cb_onerrrtnrepealfuturetobankbyfuturemanual(CbRtnField *data
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqRepeal->BankAccType).c_str()));
@@ -7691,7 +8018,11 @@ void CTPTrader::pkg_cb_onrtnrepealfrombanktofuturebyfuture(CbRtnField *data, Loc
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7752,7 +8083,11 @@ void CTPTrader::pkg_cb_onrtnrepealfromfuturetobankbyfuture(CbRtnField *data, Loc
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pRspRepeal->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pRspRepeal->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pRspRepeal->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pRspRepeal->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pRspRepeal->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pRspRepeal->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pRspRepeal->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pRspRepeal->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pRspRepeal->BankAccType).c_str()));
@@ -7806,7 +8141,11 @@ void CTPTrader::pkg_cb_onrspfrombanktofuturebyfuture(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->BankAccType).c_str()));
@@ -7861,7 +8200,11 @@ void CTPTrader::pkg_cb_onrspfromfuturetobankbyfuture(CbRtnField *data, Local <Va
     jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"), String::NewFromUtf8(isolate, pReqTransfer->UserID));
     jsonRtn->Set(String::NewFromUtf8(isolate, "VerifyCertNoFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->VerifyCertNoFlag).c_str()));
     jsonRtn->Set(String::NewFromUtf8(isolate, "CurrencyID"), String::NewFromUtf8(isolate, pReqTransfer->CurrencyID));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "TradeAmount"), Number::New(isolate, pReqTransfer->TradeAmount));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "FutureFetchAmount"), Number::New(isolate, pReqTransfer->FutureFetchAmount));
     jsonRtn->Set(String::NewFromUtf8(isolate, "FeePayFlag"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->FeePayFlag).c_str()));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "CustFee"), Number::New(isolate, pReqTransfer->CustFee));
+    jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerFee"), Number::New(isolate, pReqTransfer->BrokerFee));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Message"), String::NewFromUtf8(isolate, pReqTransfer->Message));
     jsonRtn->Set(String::NewFromUtf8(isolate, "Digest"), String::NewFromUtf8(isolate, pReqTransfer->Digest));
     jsonRtn->Set(String::NewFromUtf8(isolate, "BankAccType"), String::NewFromUtf8(isolate, charto_string(pReqTransfer->BankAccType).c_str()));
