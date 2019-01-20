@@ -27,10 +27,8 @@
   },
   "scripts": {
     "test": "node test.js",
-    "build-script": "node ./scripts/index.js",
     "build-ctp": "node-gyp rebuild",
     "build-copy": "cpx ./build/Release/*.node ./src/ && cpx ./scripts/ctp_data_type.js ./src/ && cpx ./scripts/ctp_struct.js ./src/",
-    "build": "npm run build-script && npm run build-ctp && npm run build-copy",
-    "debug": "npm run build-ctp && npm run build-copy"
+    "build": "npm run build-ctp && npm run build-copy"
   }
 }

@@ -3,20 +3,19 @@
     {
       "target_name": "ctp",
       "sources": [
-        "./cpp/ctp.cc",
-        "./cpp/ctp_trader.cpp",
-        "./cpp/uv_trader.cpp",
-        "./cpp/ctp_market.cpp",
-        "./cpp/uv_market.cpp",
-        "./cpp/ctp_utils.cpp"
+        "./cpp/shifctp.cpp",
+        "./cpp/ThostFtdcMdSpiI.cpp",
+        "./cpp/WrapMd.cpp",
+        "./cpp/ThostFtdcTraderSpiI.cpp",
+        "./cpp/WrapTd.cpp"
       ],
       "include_dirs": ["./lib/"],
       "conditions": [
         ['OS=="linux"', {
           'target_name': 'ctp_linux',
           'libraries': [
-            '/home/eric/snow-ctp/lib/thosttraderapi.so',
-            '/home/eric/snow-ctp/lib/thostmduserapi.so'
+            '$(CURDIR)/../lib/thosttraderapi.so',
+            '$(CURDIR)/../lib/thostmduserapi.so'
           ]
         }],
         ['OS=="win"', {
