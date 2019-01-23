@@ -1,7 +1,7 @@
 const structDict = {}
 
 // 信息分发
-structDict['CThostFtdcDisseminationField'] = {
+structDict.CThostFtdcDisseminationField = {
   // 序列系列号
   SequenceSeries: 'int',
   // 序列号
@@ -9,7 +9,7 @@ structDict['CThostFtdcDisseminationField'] = {
 }
 
 // 用户登录请求
-structDict['CThostFtdcReqUserLoginField'] = {
+structDict.CThostFtdcReqUserLoginField = {
   // 交易日
   TradingDay: 'string',
   // 经纪公司代码
@@ -35,7 +35,7 @@ structDict['CThostFtdcReqUserLoginField'] = {
 }
 
 // 用户登录应答
-structDict['CThostFtdcRspUserLoginField'] = {
+structDict.CThostFtdcRspUserLoginField = {
   // 交易日
   TradingDay: 'string',
   // 登录成功时间
@@ -65,7 +65,7 @@ structDict['CThostFtdcRspUserLoginField'] = {
 }
 
 // 用户登出请求
-structDict['CThostFtdcUserLogoutField'] = {
+structDict.CThostFtdcUserLogoutField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -73,7 +73,7 @@ structDict['CThostFtdcUserLogoutField'] = {
 }
 
 // 强制交易员退出
-structDict['CThostFtdcForceUserLogoutField'] = {
+structDict.CThostFtdcForceUserLogoutField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -81,7 +81,7 @@ structDict['CThostFtdcForceUserLogoutField'] = {
 }
 
 // 客户端认证请求
-structDict['CThostFtdcReqAuthenticateField'] = {
+structDict.CThostFtdcReqAuthenticateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -93,7 +93,7 @@ structDict['CThostFtdcReqAuthenticateField'] = {
 }
 
 // 客户端认证响应
-structDict['CThostFtdcRspAuthenticateField'] = {
+structDict.CThostFtdcRspAuthenticateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -103,7 +103,7 @@ structDict['CThostFtdcRspAuthenticateField'] = {
 }
 
 // 客户端认证信息
-structDict['CThostFtdcAuthenticationInfoField'] = {
+structDict.CThostFtdcAuthenticationInfoField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -117,7 +117,7 @@ structDict['CThostFtdcAuthenticationInfoField'] = {
 }
 
 // 用户登录应答2
-structDict['CThostFtdcRspUserLogin2Field'] = {
+structDict.CThostFtdcRspUserLogin2Field = {
   // 交易日
   TradingDay: 'string',
   // 登录成功时间
@@ -149,7 +149,7 @@ structDict['CThostFtdcRspUserLogin2Field'] = {
 }
 
 // 银期转帐报文头
-structDict['CThostFtdcTransferHeaderField'] = {
+structDict.CThostFtdcTransferHeaderField = {
   // 版本号，常量，1.0
   Version: 'string',
   // 交易代码，必填
@@ -179,7 +179,7 @@ structDict['CThostFtdcTransferHeaderField'] = {
 }
 
 // 银行资金转期货请求，TradeCode=202001
-structDict['CThostFtdcTransferBankToFutureReqField'] = {
+structDict.CThostFtdcTransferBankToFutureReqField = {
   // 期货资金账户
   FutureAccount: 'string',
   // 密码标志
@@ -195,7 +195,7 @@ structDict['CThostFtdcTransferBankToFutureReqField'] = {
 }
 
 // 银行资金转期货请求响应
-structDict['CThostFtdcTransferBankToFutureRspField'] = {
+structDict.CThostFtdcTransferBankToFutureRspField = {
   // 响应代码
   RetCode: 'string',
   // 响应信息
@@ -211,7 +211,7 @@ structDict['CThostFtdcTransferBankToFutureRspField'] = {
 }
 
 // 期货资金转银行请求，TradeCode=202002
-structDict['CThostFtdcTransferFutureToBankReqField'] = {
+structDict.CThostFtdcTransferFutureToBankReqField = {
   // 期货资金账户
   FutureAccount: 'string',
   // 密码标志
@@ -227,7 +227,7 @@ structDict['CThostFtdcTransferFutureToBankReqField'] = {
 }
 
 // 期货资金转银行请求响应
-structDict['CThostFtdcTransferFutureToBankRspField'] = {
+structDict.CThostFtdcTransferFutureToBankRspField = {
   // 响应代码
   RetCode: 'string',
   // 响应信息
@@ -243,7 +243,7 @@ structDict['CThostFtdcTransferFutureToBankRspField'] = {
 }
 
 // 查询银行资金请求，TradeCode=204002
-structDict['CThostFtdcTransferQryBankReqField'] = {
+structDict.CThostFtdcTransferQryBankReqField = {
   // 期货资金账户
   FutureAccount: 'string',
   // 密码标志
@@ -255,7 +255,7 @@ structDict['CThostFtdcTransferQryBankReqField'] = {
 }
 
 // 查询银行资金请求响应
-structDict['CThostFtdcTransferQryBankRspField'] = {
+structDict.CThostFtdcTransferQryBankRspField = {
   // 响应代码
   RetCode: 'string',
   // 响应信息
@@ -273,13 +273,13 @@ structDict['CThostFtdcTransferQryBankRspField'] = {
 }
 
 // 查询银行交易明细请求，TradeCode=204999
-structDict['CThostFtdcTransferQryDetailReqField'] = {
+structDict.CThostFtdcTransferQryDetailReqField = {
   // 期货资金账户
   FutureAccount: 'string'
 }
 
 // 查询银行交易明细请求响应
-structDict['CThostFtdcTransferQryDetailRspField'] = {
+structDict.CThostFtdcTransferQryDetailRspField = {
   // 交易日期
   TradeDate: 'string',
   // 交易时间
@@ -311,7 +311,7 @@ structDict['CThostFtdcTransferQryDetailRspField'] = {
 }
 
 // 响应信息
-structDict['CThostFtdcRspInfoField'] = {
+structDict.CThostFtdcRspInfoField = {
   // 错误代码
   ErrorID: 'int',
   // 错误信息
@@ -319,7 +319,7 @@ structDict['CThostFtdcRspInfoField'] = {
 }
 
 // 交易所
-structDict['CThostFtdcExchangeField'] = {
+structDict.CThostFtdcExchangeField = {
   // 交易所代码
   ExchangeID: 'string',
   // 交易所名称
@@ -329,7 +329,7 @@ structDict['CThostFtdcExchangeField'] = {
 }
 
 // 产品
-structDict['CThostFtdcProductField'] = {
+structDict.CThostFtdcProductField = {
   // 产品代码
   ProductID: 'string',
   // 产品名称
@@ -367,7 +367,7 @@ structDict['CThostFtdcProductField'] = {
 }
 
 // 合约
-structDict['CThostFtdcInstrumentField'] = {
+structDict.CThostFtdcInstrumentField = {
   // 合约代码
   InstrumentID: 'string',
   // 交易所代码
@@ -433,7 +433,7 @@ structDict['CThostFtdcInstrumentField'] = {
 }
 
 // 经纪公司
-structDict['CThostFtdcBrokerField'] = {
+structDict.CThostFtdcBrokerField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 经纪公司简称
@@ -445,7 +445,7 @@ structDict['CThostFtdcBrokerField'] = {
 }
 
 // 交易所交易员
-structDict['CThostFtdcTraderField'] = {
+structDict.CThostFtdcTraderField = {
   // 交易所代码
   ExchangeID: 'string',
   // 交易所交易员代码
@@ -461,7 +461,7 @@ structDict['CThostFtdcTraderField'] = {
 }
 
 // 投资者
-structDict['CThostFtdcInvestorField'] = {
+structDict.CThostFtdcInvestorField = {
   // 投资者代码
   InvestorID: 'string',
   // 经纪公司代码
@@ -491,7 +491,7 @@ structDict['CThostFtdcInvestorField'] = {
 }
 
 // 交易编码
-structDict['CThostFtdcTradingCodeField'] = {
+structDict.CThostFtdcTradingCodeField = {
   // 投资者代码
   InvestorID: 'string',
   // 经纪公司代码
@@ -513,7 +513,7 @@ structDict['CThostFtdcTradingCodeField'] = {
 }
 
 // 会员编码和经纪公司编码对照表
-structDict['CThostFtdcPartBrokerField'] = {
+structDict.CThostFtdcPartBrokerField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 交易所代码
@@ -525,7 +525,7 @@ structDict['CThostFtdcPartBrokerField'] = {
 }
 
 // 管理用户
-structDict['CThostFtdcSuperUserField'] = {
+structDict.CThostFtdcSuperUserField = {
   // 用户代码
   UserID: 'string',
   // 用户名称
@@ -537,7 +537,7 @@ structDict['CThostFtdcSuperUserField'] = {
 }
 
 // 管理用户功能权限
-structDict['CThostFtdcSuperUserFunctionField'] = {
+structDict.CThostFtdcSuperUserFunctionField = {
   // 用户代码
   UserID: 'string',
   // 功能代码
@@ -545,7 +545,7 @@ structDict['CThostFtdcSuperUserFunctionField'] = {
 }
 
 // 投资者组
-structDict['CThostFtdcInvestorGroupField'] = {
+structDict.CThostFtdcInvestorGroupField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者分组代码
@@ -555,7 +555,7 @@ structDict['CThostFtdcInvestorGroupField'] = {
 }
 
 // 资金账户
-structDict['CThostFtdcTradingAccountField'] = {
+structDict.CThostFtdcTradingAccountField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -657,7 +657,7 @@ structDict['CThostFtdcTradingAccountField'] = {
 }
 
 // 投资者持仓
-structDict['CThostFtdcInvestorPositionField'] = {
+structDict.CThostFtdcInvestorPositionField = {
   // 合约代码
   InstrumentID: 'string',
   // 经纪公司代码
@@ -753,7 +753,7 @@ structDict['CThostFtdcInvestorPositionField'] = {
 }
 
 // 合约保证金率
-structDict['CThostFtdcInstrumentMarginRateField'] = {
+structDict.CThostFtdcInstrumentMarginRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -781,7 +781,7 @@ structDict['CThostFtdcInstrumentMarginRateField'] = {
 }
 
 // 合约手续费率
-structDict['CThostFtdcInstrumentCommissionRateField'] = {
+structDict.CThostFtdcInstrumentCommissionRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -811,7 +811,7 @@ structDict['CThostFtdcInstrumentCommissionRateField'] = {
 }
 
 // 深度行情
-structDict['CThostFtdcDepthMarketDataField'] = {
+structDict.CThostFtdcDepthMarketDataField = {
   // 交易日
   TradingDay: 'string',
   // 合约代码
@@ -903,7 +903,7 @@ structDict['CThostFtdcDepthMarketDataField'] = {
 }
 
 // 投资者合约交易权限
-structDict['CThostFtdcInstrumentTradingRightField'] = {
+structDict.CThostFtdcInstrumentTradingRightField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -917,7 +917,7 @@ structDict['CThostFtdcInstrumentTradingRightField'] = {
 }
 
 // 经纪公司用户
-structDict['CThostFtdcBrokerUserField'] = {
+structDict.CThostFtdcBrokerUserField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -935,7 +935,7 @@ structDict['CThostFtdcBrokerUserField'] = {
 }
 
 // 经纪公司用户口令
-structDict['CThostFtdcBrokerUserPasswordField'] = {
+structDict.CThostFtdcBrokerUserPasswordField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -953,7 +953,7 @@ structDict['CThostFtdcBrokerUserPasswordField'] = {
 }
 
 // 经纪公司用户功能权限
-structDict['CThostFtdcBrokerUserFunctionField'] = {
+structDict.CThostFtdcBrokerUserFunctionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -963,7 +963,7 @@ structDict['CThostFtdcBrokerUserFunctionField'] = {
 }
 
 // 交易所交易员报盘机
-structDict['CThostFtdcTraderOfferField'] = {
+structDict.CThostFtdcTraderOfferField = {
   // 交易所代码
   ExchangeID: 'string',
   // 交易所交易员代码
@@ -1005,7 +1005,7 @@ structDict['CThostFtdcTraderOfferField'] = {
 }
 
 // 投资者结算结果
-structDict['CThostFtdcSettlementInfoField'] = {
+structDict.CThostFtdcSettlementInfoField = {
   // 交易日
   TradingDay: 'string',
   // 结算编号
@@ -1025,7 +1025,7 @@ structDict['CThostFtdcSettlementInfoField'] = {
 }
 
 // 合约保证金率调整
-structDict['CThostFtdcInstrumentMarginRateAdjustField'] = {
+structDict.CThostFtdcInstrumentMarginRateAdjustField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -1049,7 +1049,7 @@ structDict['CThostFtdcInstrumentMarginRateAdjustField'] = {
 }
 
 // 交易所保证金率
-structDict['CThostFtdcExchangeMarginRateField'] = {
+structDict.CThostFtdcExchangeMarginRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -1069,7 +1069,7 @@ structDict['CThostFtdcExchangeMarginRateField'] = {
 }
 
 // 交易所保证金率调整
-structDict['CThostFtdcExchangeMarginRateAdjustField'] = {
+structDict.CThostFtdcExchangeMarginRateAdjustField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -1103,7 +1103,7 @@ structDict['CThostFtdcExchangeMarginRateAdjustField'] = {
 }
 
 // 汇率
-structDict['CThostFtdcExchangeRateField'] = {
+structDict.CThostFtdcExchangeRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 源币种
@@ -1117,7 +1117,7 @@ structDict['CThostFtdcExchangeRateField'] = {
 }
 
 // 结算引用
-structDict['CThostFtdcSettlementRefField'] = {
+structDict.CThostFtdcSettlementRefField = {
   // 交易日
   TradingDay: 'string',
   // 结算编号
@@ -1125,7 +1125,7 @@ structDict['CThostFtdcSettlementRefField'] = {
 }
 
 // 当前时间
-structDict['CThostFtdcCurrentTimeField'] = {
+structDict.CThostFtdcCurrentTimeField = {
   // 当前日期
   CurrDate: 'string',
   // 当前时间
@@ -1137,7 +1137,7 @@ structDict['CThostFtdcCurrentTimeField'] = {
 }
 
 // 通讯阶段
-structDict['CThostFtdcCommPhaseField'] = {
+structDict.CThostFtdcCommPhaseField = {
   // 交易日
   TradingDay: 'string',
   // 通讯时段编号
@@ -1147,7 +1147,7 @@ structDict['CThostFtdcCommPhaseField'] = {
 }
 
 // 登录信息
-structDict['CThostFtdcLoginInfoField'] = {
+structDict.CThostFtdcLoginInfoField = {
   // 前置编号
   FrontID: 'int',
   // 会话编号
@@ -1197,7 +1197,7 @@ structDict['CThostFtdcLoginInfoField'] = {
 }
 
 // 登录信息
-structDict['CThostFtdcLogoutAllField'] = {
+structDict.CThostFtdcLogoutAllField = {
   // 前置编号
   FrontID: 'int',
   // 会话编号
@@ -1207,7 +1207,7 @@ structDict['CThostFtdcLogoutAllField'] = {
 }
 
 // 前置状态
-structDict['CThostFtdcFrontStatusField'] = {
+structDict.CThostFtdcFrontStatusField = {
   // 前置编号
   FrontID: 'int',
   // 上次报告日期
@@ -1219,7 +1219,7 @@ structDict['CThostFtdcFrontStatusField'] = {
 }
 
 // 用户口令变更
-structDict['CThostFtdcUserPasswordUpdateField'] = {
+structDict.CThostFtdcUserPasswordUpdateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -1231,7 +1231,7 @@ structDict['CThostFtdcUserPasswordUpdateField'] = {
 }
 
 // 输入报单
-structDict['CThostFtdcInputOrderField'] = {
+structDict.CThostFtdcInputOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1295,7 +1295,7 @@ structDict['CThostFtdcInputOrderField'] = {
 }
 
 // 报单
-structDict['CThostFtdcOrderField'] = {
+structDict.CThostFtdcOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1425,7 +1425,7 @@ structDict['CThostFtdcOrderField'] = {
 }
 
 // 交易所报单
-structDict['CThostFtdcExchangeOrderField'] = {
+structDict.CThostFtdcExchangeOrderField = {
   // 报单价格条件
   OrderPriceType: 'char',
   // 买卖方向
@@ -1519,7 +1519,7 @@ structDict['CThostFtdcExchangeOrderField'] = {
 }
 
 // 交易所报单插入失败
-structDict['CThostFtdcExchangeOrderInsertErrorField'] = {
+structDict.CThostFtdcExchangeOrderInsertErrorField = {
   // 交易所代码
   ExchangeID: 'string',
   // 会员代码
@@ -1537,7 +1537,7 @@ structDict['CThostFtdcExchangeOrderInsertErrorField'] = {
 }
 
 // 输入报单操作
-structDict['CThostFtdcInputOrderActionField'] = {
+structDict.CThostFtdcInputOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1575,7 +1575,7 @@ structDict['CThostFtdcInputOrderActionField'] = {
 }
 
 // 报单操作
-structDict['CThostFtdcOrderActionField'] = {
+structDict.CThostFtdcOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1637,7 +1637,7 @@ structDict['CThostFtdcOrderActionField'] = {
 }
 
 // 交易所报单操作
-structDict['CThostFtdcExchangeOrderActionField'] = {
+structDict.CThostFtdcExchangeOrderActionField = {
   // 交易所代码
   ExchangeID: 'string',
   // 报单编号
@@ -1679,7 +1679,7 @@ structDict['CThostFtdcExchangeOrderActionField'] = {
 }
 
 // 交易所报单操作失败
-structDict['CThostFtdcExchangeOrderActionErrorField'] = {
+structDict.CThostFtdcExchangeOrderActionErrorField = {
   // 交易所代码
   ExchangeID: 'string',
   // 报单编号
@@ -1699,7 +1699,7 @@ structDict['CThostFtdcExchangeOrderActionErrorField'] = {
 }
 
 // 交易所成交
-structDict['CThostFtdcExchangeTradeField'] = {
+structDict.CThostFtdcExchangeTradeField = {
   // 交易所代码
   ExchangeID: 'string',
   // 成交编号
@@ -1747,7 +1747,7 @@ structDict['CThostFtdcExchangeTradeField'] = {
 }
 
 // 成交
-structDict['CThostFtdcTradeField'] = {
+structDict.CThostFtdcTradeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1813,7 +1813,7 @@ structDict['CThostFtdcTradeField'] = {
 }
 
 // 用户会话
-structDict['CThostFtdcUserSessionField'] = {
+structDict.CThostFtdcUserSessionField = {
   // 前置编号
   FrontID: 'int',
   // 会话编号
@@ -1841,7 +1841,7 @@ structDict['CThostFtdcUserSessionField'] = {
 }
 
 // 查询最大报单数量
-structDict['CThostFtdcQueryMaxOrderVolumeField'] = {
+structDict.CThostFtdcQueryMaxOrderVolumeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1863,7 +1863,7 @@ structDict['CThostFtdcQueryMaxOrderVolumeField'] = {
 }
 
 // 投资者结算结果确认信息
-structDict['CThostFtdcSettlementInfoConfirmField'] = {
+structDict.CThostFtdcSettlementInfoConfirmField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -1881,7 +1881,7 @@ structDict['CThostFtdcSettlementInfoConfirmField'] = {
 }
 
 // 出入金同步
-structDict['CThostFtdcSyncDepositField'] = {
+structDict.CThostFtdcSyncDepositField = {
   // 出入金流水号
   DepositSeqNo: 'string',
   // 经纪公司代码
@@ -1897,7 +1897,7 @@ structDict['CThostFtdcSyncDepositField'] = {
 }
 
 // 货币质押同步
-structDict['CThostFtdcSyncFundMortgageField'] = {
+structDict.CThostFtdcSyncFundMortgageField = {
   // 货币质押流水号
   MortgageSeqNo: 'string',
   // 经纪公司代码
@@ -1913,13 +1913,13 @@ structDict['CThostFtdcSyncFundMortgageField'] = {
 }
 
 // 经纪公司同步
-structDict['CThostFtdcBrokerSyncField'] = {
+structDict.CThostFtdcBrokerSyncField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 正在同步中的投资者
-structDict['CThostFtdcSyncingInvestorField'] = {
+structDict.CThostFtdcSyncingInvestorField = {
   // 投资者代码
   InvestorID: 'string',
   // 经纪公司代码
@@ -1949,7 +1949,7 @@ structDict['CThostFtdcSyncingInvestorField'] = {
 }
 
 // 正在同步中的交易代码
-structDict['CThostFtdcSyncingTradingCodeField'] = {
+structDict.CThostFtdcSyncingTradingCodeField = {
   // 投资者代码
   InvestorID: 'string',
   // 经纪公司代码
@@ -1965,7 +1965,7 @@ structDict['CThostFtdcSyncingTradingCodeField'] = {
 }
 
 // 正在同步中的投资者分组
-structDict['CThostFtdcSyncingInvestorGroupField'] = {
+structDict.CThostFtdcSyncingInvestorGroupField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者分组代码
@@ -1975,7 +1975,7 @@ structDict['CThostFtdcSyncingInvestorGroupField'] = {
 }
 
 // 正在同步中的交易账号
-structDict['CThostFtdcSyncingTradingAccountField'] = {
+structDict.CThostFtdcSyncingTradingAccountField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -2075,7 +2075,7 @@ structDict['CThostFtdcSyncingTradingAccountField'] = {
 }
 
 // 正在同步中的投资者持仓
-structDict['CThostFtdcSyncingInvestorPositionField'] = {
+structDict.CThostFtdcSyncingInvestorPositionField = {
   // 合约代码
   InstrumentID: 'string',
   // 经纪公司代码
@@ -2171,7 +2171,7 @@ structDict['CThostFtdcSyncingInvestorPositionField'] = {
 }
 
 // 正在同步中的合约保证金率
-structDict['CThostFtdcSyncingInstrumentMarginRateField'] = {
+structDict.CThostFtdcSyncingInstrumentMarginRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2195,7 +2195,7 @@ structDict['CThostFtdcSyncingInstrumentMarginRateField'] = {
 }
 
 // 正在同步中的合约手续费率
-structDict['CThostFtdcSyncingInstrumentCommissionRateField'] = {
+structDict.CThostFtdcSyncingInstrumentCommissionRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2219,7 +2219,7 @@ structDict['CThostFtdcSyncingInstrumentCommissionRateField'] = {
 }
 
 // 正在同步中的合约交易权限
-structDict['CThostFtdcSyncingInstrumentTradingRightField'] = {
+structDict.CThostFtdcSyncingInstrumentTradingRightField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2233,7 +2233,7 @@ structDict['CThostFtdcSyncingInstrumentTradingRightField'] = {
 }
 
 // 查询报单
-structDict['CThostFtdcQryOrderField'] = {
+structDict.CThostFtdcQryOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2253,7 +2253,7 @@ structDict['CThostFtdcQryOrderField'] = {
 }
 
 // 查询成交
-structDict['CThostFtdcQryTradeField'] = {
+structDict.CThostFtdcQryTradeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2273,7 +2273,7 @@ structDict['CThostFtdcQryTradeField'] = {
 }
 
 // 查询投资者持仓
-structDict['CThostFtdcQryInvestorPositionField'] = {
+structDict.CThostFtdcQryInvestorPositionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2287,7 +2287,7 @@ structDict['CThostFtdcQryInvestorPositionField'] = {
 }
 
 // 查询资金账户
-structDict['CThostFtdcQryTradingAccountField'] = {
+structDict.CThostFtdcQryTradingAccountField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2301,7 +2301,7 @@ structDict['CThostFtdcQryTradingAccountField'] = {
 }
 
 // 查询投资者
-structDict['CThostFtdcQryInvestorField'] = {
+structDict.CThostFtdcQryInvestorField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2309,7 +2309,7 @@ structDict['CThostFtdcQryInvestorField'] = {
 }
 
 // 查询交易编码
-structDict['CThostFtdcQryTradingCodeField'] = {
+structDict.CThostFtdcQryTradingCodeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2325,13 +2325,13 @@ structDict['CThostFtdcQryTradingCodeField'] = {
 }
 
 // 查询投资者组
-structDict['CThostFtdcQryInvestorGroupField'] = {
+structDict.CThostFtdcQryInvestorGroupField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 查询合约保证金率
-structDict['CThostFtdcQryInstrumentMarginRateField'] = {
+structDict.CThostFtdcQryInstrumentMarginRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2347,7 +2347,7 @@ structDict['CThostFtdcQryInstrumentMarginRateField'] = {
 }
 
 // 查询手续费率
-structDict['CThostFtdcQryInstrumentCommissionRateField'] = {
+structDict.CThostFtdcQryInstrumentCommissionRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2361,7 +2361,7 @@ structDict['CThostFtdcQryInstrumentCommissionRateField'] = {
 }
 
 // 查询合约交易权限
-structDict['CThostFtdcQryInstrumentTradingRightField'] = {
+structDict.CThostFtdcQryInstrumentTradingRightField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2371,13 +2371,13 @@ structDict['CThostFtdcQryInstrumentTradingRightField'] = {
 }
 
 // 查询经纪公司
-structDict['CThostFtdcQryBrokerField'] = {
+structDict.CThostFtdcQryBrokerField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 查询交易员
-structDict['CThostFtdcQryTraderField'] = {
+structDict.CThostFtdcQryTraderField = {
   // 交易所代码
   ExchangeID: 'string',
   // 会员代码
@@ -2387,13 +2387,13 @@ structDict['CThostFtdcQryTraderField'] = {
 }
 
 // 查询管理用户功能权限
-structDict['CThostFtdcQrySuperUserFunctionField'] = {
+structDict.CThostFtdcQrySuperUserFunctionField = {
   // 用户代码
   UserID: 'string'
 }
 
 // 查询用户会话
-structDict['CThostFtdcQryUserSessionField'] = {
+structDict.CThostFtdcQryUserSessionField = {
   // 前置编号
   FrontID: 'int',
   // 会话编号
@@ -2405,7 +2405,7 @@ structDict['CThostFtdcQryUserSessionField'] = {
 }
 
 // 查询经纪公司会员代码
-structDict['CThostFtdcQryPartBrokerField'] = {
+structDict.CThostFtdcQryPartBrokerField = {
   // 交易所代码
   ExchangeID: 'string',
   // 经纪公司代码
@@ -2415,13 +2415,13 @@ structDict['CThostFtdcQryPartBrokerField'] = {
 }
 
 // 查询前置状态
-structDict['CThostFtdcQryFrontStatusField'] = {
+structDict.CThostFtdcQryFrontStatusField = {
   // 前置编号
   FrontID: 'int'
 }
 
 // 查询交易所报单
-structDict['CThostFtdcQryExchangeOrderField'] = {
+structDict.CThostFtdcQryExchangeOrderField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -2435,7 +2435,7 @@ structDict['CThostFtdcQryExchangeOrderField'] = {
 }
 
 // 查询报单操作
-structDict['CThostFtdcQryOrderActionField'] = {
+structDict.CThostFtdcQryOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2445,7 +2445,7 @@ structDict['CThostFtdcQryOrderActionField'] = {
 }
 
 // 查询交易所报单操作
-structDict['CThostFtdcQryExchangeOrderActionField'] = {
+structDict.CThostFtdcQryExchangeOrderActionField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -2457,19 +2457,19 @@ structDict['CThostFtdcQryExchangeOrderActionField'] = {
 }
 
 // 查询管理用户
-structDict['CThostFtdcQrySuperUserField'] = {
+structDict.CThostFtdcQrySuperUserField = {
   // 用户代码
   UserID: 'string'
 }
 
 // 查询交易所
-structDict['CThostFtdcQryExchangeField'] = {
+structDict.CThostFtdcQryExchangeField = {
   // 交易所代码
   ExchangeID: 'string'
 }
 
 // 查询产品
-structDict['CThostFtdcQryProductField'] = {
+structDict.CThostFtdcQryProductField = {
   // 产品代码
   ProductID: 'string',
   // 产品类型
@@ -2479,7 +2479,7 @@ structDict['CThostFtdcQryProductField'] = {
 }
 
 // 查询合约
-structDict['CThostFtdcQryInstrumentField'] = {
+structDict.CThostFtdcQryInstrumentField = {
   // 合约代码
   InstrumentID: 'string',
   // 交易所代码
@@ -2491,7 +2491,7 @@ structDict['CThostFtdcQryInstrumentField'] = {
 }
 
 // 查询行情
-structDict['CThostFtdcQryDepthMarketDataField'] = {
+structDict.CThostFtdcQryDepthMarketDataField = {
   // 合约代码
   InstrumentID: 'string',
   // 交易所代码
@@ -2499,7 +2499,7 @@ structDict['CThostFtdcQryDepthMarketDataField'] = {
 }
 
 // 查询经纪公司用户
-structDict['CThostFtdcQryBrokerUserField'] = {
+structDict.CThostFtdcQryBrokerUserField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -2507,7 +2507,7 @@ structDict['CThostFtdcQryBrokerUserField'] = {
 }
 
 // 查询经纪公司用户权限
-structDict['CThostFtdcQryBrokerUserFunctionField'] = {
+structDict.CThostFtdcQryBrokerUserFunctionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -2515,7 +2515,7 @@ structDict['CThostFtdcQryBrokerUserFunctionField'] = {
 }
 
 // 查询交易员报盘机
-structDict['CThostFtdcQryTraderOfferField'] = {
+structDict.CThostFtdcQryTraderOfferField = {
   // 交易所代码
   ExchangeID: 'string',
   // 会员代码
@@ -2525,7 +2525,7 @@ structDict['CThostFtdcQryTraderOfferField'] = {
 }
 
 // 查询出入金流水
-structDict['CThostFtdcQrySyncDepositField'] = {
+structDict.CThostFtdcQrySyncDepositField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 出入金流水号
@@ -2533,7 +2533,7 @@ structDict['CThostFtdcQrySyncDepositField'] = {
 }
 
 // 查询投资者结算结果
-structDict['CThostFtdcQrySettlementInfoField'] = {
+structDict.CThostFtdcQrySettlementInfoField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2547,7 +2547,7 @@ structDict['CThostFtdcQrySettlementInfoField'] = {
 }
 
 // 查询交易所保证金率
-structDict['CThostFtdcQryExchangeMarginRateField'] = {
+structDict.CThostFtdcQryExchangeMarginRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -2559,7 +2559,7 @@ structDict['CThostFtdcQryExchangeMarginRateField'] = {
 }
 
 // 查询交易所调整保证金率
-structDict['CThostFtdcQryExchangeMarginRateAdjustField'] = {
+structDict.CThostFtdcQryExchangeMarginRateAdjustField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -2569,7 +2569,7 @@ structDict['CThostFtdcQryExchangeMarginRateAdjustField'] = {
 }
 
 // 查询汇率
-structDict['CThostFtdcQryExchangeRateField'] = {
+structDict.CThostFtdcQryExchangeRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 源币种
@@ -2579,7 +2579,7 @@ structDict['CThostFtdcQryExchangeRateField'] = {
 }
 
 // 查询货币质押流水
-structDict['CThostFtdcQrySyncFundMortgageField'] = {
+structDict.CThostFtdcQrySyncFundMortgageField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 货币质押流水号
@@ -2587,7 +2587,7 @@ structDict['CThostFtdcQrySyncFundMortgageField'] = {
 }
 
 // 查询报单
-structDict['CThostFtdcQryHisOrderField'] = {
+structDict.CThostFtdcQryHisOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2609,7 +2609,7 @@ structDict['CThostFtdcQryHisOrderField'] = {
 }
 
 // 当前期权合约最小保证金
-structDict['CThostFtdcOptionInstrMiniMarginField'] = {
+structDict.CThostFtdcOptionInstrMiniMarginField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2627,7 +2627,7 @@ structDict['CThostFtdcOptionInstrMiniMarginField'] = {
 }
 
 // 当前期权合约保证金调整系数
-structDict['CThostFtdcOptionInstrMarginAdjustField'] = {
+structDict.CThostFtdcOptionInstrMarginAdjustField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2657,7 +2657,7 @@ structDict['CThostFtdcOptionInstrMarginAdjustField'] = {
 }
 
 // 当前期权合约手续费的详细内容
-structDict['CThostFtdcOptionInstrCommRateField'] = {
+structDict.CThostFtdcOptionInstrCommRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -2689,7 +2689,7 @@ structDict['CThostFtdcOptionInstrCommRateField'] = {
 }
 
 // 期权交易成本
-structDict['CThostFtdcOptionInstrTradeCostField'] = {
+structDict.CThostFtdcOptionInstrTradeCostField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2715,7 +2715,7 @@ structDict['CThostFtdcOptionInstrTradeCostField'] = {
 }
 
 // 期权交易成本查询
-structDict['CThostFtdcQryOptionInstrTradeCostField'] = {
+structDict.CThostFtdcQryOptionInstrTradeCostField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2735,7 +2735,7 @@ structDict['CThostFtdcQryOptionInstrTradeCostField'] = {
 }
 
 // 期权手续费率查询
-structDict['CThostFtdcQryOptionInstrCommRateField'] = {
+structDict.CThostFtdcQryOptionInstrCommRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2749,7 +2749,7 @@ structDict['CThostFtdcQryOptionInstrCommRateField'] = {
 }
 
 // 股指现货指数
-structDict['CThostFtdcIndexPriceField'] = {
+structDict.CThostFtdcIndexPriceField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -2759,7 +2759,7 @@ structDict['CThostFtdcIndexPriceField'] = {
 }
 
 // 输入的执行宣告
-structDict['CThostFtdcInputExecOrderField'] = {
+structDict.CThostFtdcInputExecOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2805,7 +2805,7 @@ structDict['CThostFtdcInputExecOrderField'] = {
 }
 
 // 输入执行宣告操作
-structDict['CThostFtdcInputExecOrderActionField'] = {
+structDict.CThostFtdcInputExecOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2839,7 +2839,7 @@ structDict['CThostFtdcInputExecOrderActionField'] = {
 }
 
 // 执行宣告
-structDict['CThostFtdcExecOrderField'] = {
+structDict.CThostFtdcExecOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2931,7 +2931,7 @@ structDict['CThostFtdcExecOrderField'] = {
 }
 
 // 执行宣告操作
-structDict['CThostFtdcExecOrderActionField'] = {
+structDict.CThostFtdcExecOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -2991,7 +2991,7 @@ structDict['CThostFtdcExecOrderActionField'] = {
 }
 
 // 执行宣告查询
-structDict['CThostFtdcQryExecOrderField'] = {
+structDict.CThostFtdcQryExecOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3009,7 +3009,7 @@ structDict['CThostFtdcQryExecOrderField'] = {
 }
 
 // 交易所执行宣告信息
-structDict['CThostFtdcExchangeExecOrderField'] = {
+structDict.CThostFtdcExchangeExecOrderField = {
   // 数量
   Volume: 'int',
   // 请求编号
@@ -3073,7 +3073,7 @@ structDict['CThostFtdcExchangeExecOrderField'] = {
 }
 
 // 交易所执行宣告查询
-structDict['CThostFtdcQryExchangeExecOrderField'] = {
+structDict.CThostFtdcQryExchangeExecOrderField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -3087,7 +3087,7 @@ structDict['CThostFtdcQryExchangeExecOrderField'] = {
 }
 
 // 执行宣告操作查询
-structDict['CThostFtdcQryExecOrderActionField'] = {
+structDict.CThostFtdcQryExecOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3097,7 +3097,7 @@ structDict['CThostFtdcQryExecOrderActionField'] = {
 }
 
 // 交易所执行宣告操作
-structDict['CThostFtdcExchangeExecOrderActionField'] = {
+structDict.CThostFtdcExchangeExecOrderActionField = {
   // 交易所代码
   ExchangeID: 'string',
   // 执行宣告操作编号
@@ -3137,7 +3137,7 @@ structDict['CThostFtdcExchangeExecOrderActionField'] = {
 }
 
 // 交易所执行宣告操作查询
-structDict['CThostFtdcQryExchangeExecOrderActionField'] = {
+structDict.CThostFtdcQryExchangeExecOrderActionField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -3149,7 +3149,7 @@ structDict['CThostFtdcQryExchangeExecOrderActionField'] = {
 }
 
 // 错误执行宣告
-structDict['CThostFtdcErrExecOrderField'] = {
+structDict.CThostFtdcErrExecOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3199,7 +3199,7 @@ structDict['CThostFtdcErrExecOrderField'] = {
 }
 
 // 查询错误执行宣告
-structDict['CThostFtdcQryErrExecOrderField'] = {
+structDict.CThostFtdcQryErrExecOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3207,7 +3207,7 @@ structDict['CThostFtdcQryErrExecOrderField'] = {
 }
 
 // 错误执行宣告操作
-structDict['CThostFtdcErrExecOrderActionField'] = {
+structDict.CThostFtdcErrExecOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3245,7 +3245,7 @@ structDict['CThostFtdcErrExecOrderActionField'] = {
 }
 
 // 查询错误执行宣告操作
-structDict['CThostFtdcQryErrExecOrderActionField'] = {
+structDict.CThostFtdcQryErrExecOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3253,7 +3253,7 @@ structDict['CThostFtdcQryErrExecOrderActionField'] = {
 }
 
 // 投资者期权合约交易权限
-structDict['CThostFtdcOptionInstrTradingRightField'] = {
+structDict.CThostFtdcOptionInstrTradingRightField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -3269,7 +3269,7 @@ structDict['CThostFtdcOptionInstrTradingRightField'] = {
 }
 
 // 查询期权合约交易权限
-structDict['CThostFtdcQryOptionInstrTradingRightField'] = {
+structDict.CThostFtdcQryOptionInstrTradingRightField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3281,7 +3281,7 @@ structDict['CThostFtdcQryOptionInstrTradingRightField'] = {
 }
 
 // 输入的询价
-structDict['CThostFtdcInputForQuoteField'] = {
+structDict.CThostFtdcInputForQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3303,7 +3303,7 @@ structDict['CThostFtdcInputForQuoteField'] = {
 }
 
 // 询价
-structDict['CThostFtdcForQuoteField'] = {
+structDict.CThostFtdcForQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3353,7 +3353,7 @@ structDict['CThostFtdcForQuoteField'] = {
 }
 
 // 询价查询
-structDict['CThostFtdcQryForQuoteField'] = {
+structDict.CThostFtdcQryForQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3371,7 +3371,7 @@ structDict['CThostFtdcQryForQuoteField'] = {
 }
 
 // 交易所询价信息
-structDict['CThostFtdcExchangeForQuoteField'] = {
+structDict.CThostFtdcExchangeForQuoteField = {
   // 本地询价编号
   ForQuoteLocalID: 'string',
   // 交易所代码
@@ -3399,7 +3399,7 @@ structDict['CThostFtdcExchangeForQuoteField'] = {
 }
 
 // 交易所询价查询
-structDict['CThostFtdcQryExchangeForQuoteField'] = {
+structDict.CThostFtdcQryExchangeForQuoteField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -3413,7 +3413,7 @@ structDict['CThostFtdcQryExchangeForQuoteField'] = {
 }
 
 // 输入的报价
-structDict['CThostFtdcInputQuoteField'] = {
+structDict.CThostFtdcInputQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3463,7 +3463,7 @@ structDict['CThostFtdcInputQuoteField'] = {
 }
 
 // 输入报价操作
-structDict['CThostFtdcInputQuoteActionField'] = {
+structDict.CThostFtdcInputQuoteActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3499,7 +3499,7 @@ structDict['CThostFtdcInputQuoteActionField'] = {
 }
 
 // 报价
-structDict['CThostFtdcQuoteField'] = {
+structDict.CThostFtdcQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3603,7 +3603,7 @@ structDict['CThostFtdcQuoteField'] = {
 }
 
 // 报价操作
-structDict['CThostFtdcQuoteActionField'] = {
+structDict.CThostFtdcQuoteActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3661,7 +3661,7 @@ structDict['CThostFtdcQuoteActionField'] = {
 }
 
 // 报价查询
-structDict['CThostFtdcQryQuoteField'] = {
+structDict.CThostFtdcQryQuoteField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3681,7 +3681,7 @@ structDict['CThostFtdcQryQuoteField'] = {
 }
 
 // 交易所报价信息
-structDict['CThostFtdcExchangeQuoteField'] = {
+structDict.CThostFtdcExchangeQuoteField = {
   // 卖价格
   AskPrice: 'float',
   // 买价格
@@ -3753,7 +3753,7 @@ structDict['CThostFtdcExchangeQuoteField'] = {
 }
 
 // 交易所报价查询
-structDict['CThostFtdcQryExchangeQuoteField'] = {
+structDict.CThostFtdcQryExchangeQuoteField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -3767,7 +3767,7 @@ structDict['CThostFtdcQryExchangeQuoteField'] = {
 }
 
 // 报价操作查询
-structDict['CThostFtdcQryQuoteActionField'] = {
+structDict.CThostFtdcQryQuoteActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3777,7 +3777,7 @@ structDict['CThostFtdcQryQuoteActionField'] = {
 }
 
 // 交易所报价操作
-structDict['CThostFtdcExchangeQuoteActionField'] = {
+structDict.CThostFtdcExchangeQuoteActionField = {
   // 交易所代码
   ExchangeID: 'string',
   // 报价操作编号
@@ -3813,7 +3813,7 @@ structDict['CThostFtdcExchangeQuoteActionField'] = {
 }
 
 // 交易所报价操作查询
-structDict['CThostFtdcQryExchangeQuoteActionField'] = {
+structDict.CThostFtdcQryExchangeQuoteActionField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -3825,7 +3825,7 @@ structDict['CThostFtdcQryExchangeQuoteActionField'] = {
 }
 
 // 期权合约delta值
-structDict['CThostFtdcOptionInstrDeltaField'] = {
+structDict.CThostFtdcOptionInstrDeltaField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -3839,7 +3839,7 @@ structDict['CThostFtdcOptionInstrDeltaField'] = {
 }
 
 // 发给做市商的询价请求
-structDict['CThostFtdcForQuoteRspField'] = {
+structDict.CThostFtdcForQuoteRspField = {
   // 交易日
   TradingDay: 'string',
   // 合约代码
@@ -3855,7 +3855,7 @@ structDict['CThostFtdcForQuoteRspField'] = {
 }
 
 // 当前期权合约执行偏移值的详细内容
-structDict['CThostFtdcStrikeOffsetField'] = {
+structDict.CThostFtdcStrikeOffsetField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -3871,7 +3871,7 @@ structDict['CThostFtdcStrikeOffsetField'] = {
 }
 
 // 期权执行偏移值查询
-structDict['CThostFtdcQryStrikeOffsetField'] = {
+structDict.CThostFtdcQryStrikeOffsetField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3881,7 +3881,7 @@ structDict['CThostFtdcQryStrikeOffsetField'] = {
 }
 
 // 输入批量报单操作
-structDict['CThostFtdcInputBatchOrderActionField'] = {
+structDict.CThostFtdcInputBatchOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3907,7 +3907,7 @@ structDict['CThostFtdcInputBatchOrderActionField'] = {
 }
 
 // 批量报单操作
-structDict['CThostFtdcBatchOrderActionField'] = {
+structDict.CThostFtdcBatchOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3953,7 +3953,7 @@ structDict['CThostFtdcBatchOrderActionField'] = {
 }
 
 // 交易所批量报单操作
-structDict['CThostFtdcExchangeBatchOrderActionField'] = {
+structDict.CThostFtdcExchangeBatchOrderActionField = {
   // 交易所代码
   ExchangeID: 'string',
   // 操作日期
@@ -3983,7 +3983,7 @@ structDict['CThostFtdcExchangeBatchOrderActionField'] = {
 }
 
 // 查询批量报单操作
-structDict['CThostFtdcQryBatchOrderActionField'] = {
+structDict.CThostFtdcQryBatchOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -3993,7 +3993,7 @@ structDict['CThostFtdcQryBatchOrderActionField'] = {
 }
 
 // 组合合约安全系数
-structDict['CThostFtdcCombInstrumentGuardField'] = {
+structDict.CThostFtdcCombInstrumentGuardField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -4005,7 +4005,7 @@ structDict['CThostFtdcCombInstrumentGuardField'] = {
 }
 
 // 组合合约安全系数查询
-structDict['CThostFtdcQryCombInstrumentGuardField'] = {
+structDict.CThostFtdcQryCombInstrumentGuardField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -4015,7 +4015,7 @@ structDict['CThostFtdcQryCombInstrumentGuardField'] = {
 }
 
 // 输入的申请组合
-structDict['CThostFtdcInputCombActionField'] = {
+structDict.CThostFtdcInputCombActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4045,7 +4045,7 @@ structDict['CThostFtdcInputCombActionField'] = {
 }
 
 // 申请组合
-structDict['CThostFtdcCombActionField'] = {
+structDict.CThostFtdcCombActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4109,7 +4109,7 @@ structDict['CThostFtdcCombActionField'] = {
 }
 
 // 申请组合查询
-structDict['CThostFtdcQryCombActionField'] = {
+structDict.CThostFtdcQryCombActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4123,7 +4123,7 @@ structDict['CThostFtdcQryCombActionField'] = {
 }
 
 // 交易所申请组合信息
-structDict['CThostFtdcExchangeCombActionField'] = {
+structDict.CThostFtdcExchangeCombActionField = {
   // 买卖方向
   Direction: 'char',
   // 数量
@@ -4167,7 +4167,7 @@ structDict['CThostFtdcExchangeCombActionField'] = {
 }
 
 // 交易所申请组合查询
-structDict['CThostFtdcQryExchangeCombActionField'] = {
+structDict.CThostFtdcQryExchangeCombActionField = {
   // 会员代码
   ParticipantID: 'string',
   // 客户代码
@@ -4181,7 +4181,7 @@ structDict['CThostFtdcQryExchangeCombActionField'] = {
 }
 
 // 产品报价汇率
-structDict['CThostFtdcProductExchRateField'] = {
+structDict.CThostFtdcProductExchRateField = {
   // 产品代码
   ProductID: 'string',
   // 报价币种类型
@@ -4193,7 +4193,7 @@ structDict['CThostFtdcProductExchRateField'] = {
 }
 
 // 产品报价汇率查询
-structDict['CThostFtdcQryProductExchRateField'] = {
+structDict.CThostFtdcQryProductExchRateField = {
   // 产品代码
   ProductID: 'string',
   // 交易所代码
@@ -4201,7 +4201,7 @@ structDict['CThostFtdcQryProductExchRateField'] = {
 }
 
 // 查询询价价差参数
-structDict['CThostFtdcQryForQuoteParamField'] = {
+structDict.CThostFtdcQryForQuoteParamField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -4211,7 +4211,7 @@ structDict['CThostFtdcQryForQuoteParamField'] = {
 }
 
 // 询价价差参数
-structDict['CThostFtdcForQuoteParamField'] = {
+structDict.CThostFtdcForQuoteParamField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 合约代码
@@ -4225,7 +4225,7 @@ structDict['CThostFtdcForQuoteParamField'] = {
 }
 
 // 当前做市商期权合约手续费的详细内容
-structDict['CThostFtdcMMOptionInstrCommRateField'] = {
+structDict.CThostFtdcMMOptionInstrCommRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -4253,7 +4253,7 @@ structDict['CThostFtdcMMOptionInstrCommRateField'] = {
 }
 
 // 做市商期权手续费率查询
-structDict['CThostFtdcQryMMOptionInstrCommRateField'] = {
+structDict.CThostFtdcQryMMOptionInstrCommRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4263,7 +4263,7 @@ structDict['CThostFtdcQryMMOptionInstrCommRateField'] = {
 }
 
 // 做市商合约手续费率
-structDict['CThostFtdcMMInstrumentCommissionRateField'] = {
+structDict.CThostFtdcMMInstrumentCommissionRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -4287,7 +4287,7 @@ structDict['CThostFtdcMMInstrumentCommissionRateField'] = {
 }
 
 // 查询做市商合约手续费率
-structDict['CThostFtdcQryMMInstrumentCommissionRateField'] = {
+structDict.CThostFtdcQryMMInstrumentCommissionRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4297,7 +4297,7 @@ structDict['CThostFtdcQryMMInstrumentCommissionRateField'] = {
 }
 
 // 当前报单手续费的详细内容
-structDict['CThostFtdcInstrumentOrderCommRateField'] = {
+structDict.CThostFtdcInstrumentOrderCommRateField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -4319,7 +4319,7 @@ structDict['CThostFtdcInstrumentOrderCommRateField'] = {
 }
 
 // 报单手续费率查询
-structDict['CThostFtdcQryInstrumentOrderCommRateField'] = {
+structDict.CThostFtdcQryInstrumentOrderCommRateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4329,7 +4329,7 @@ structDict['CThostFtdcQryInstrumentOrderCommRateField'] = {
 }
 
 // 交易参数
-structDict['CThostFtdcTradeParamField'] = {
+structDict.CThostFtdcTradeParamField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 参数代码
@@ -4341,7 +4341,7 @@ structDict['CThostFtdcTradeParamField'] = {
 }
 
 // 合约保证金率调整
-structDict['CThostFtdcInstrumentMarginRateULField'] = {
+structDict.CThostFtdcInstrumentMarginRateULField = {
   // 合约代码
   InstrumentID: 'string',
   // 投资者范围
@@ -4363,7 +4363,7 @@ structDict['CThostFtdcInstrumentMarginRateULField'] = {
 }
 
 // 期货持仓限制参数
-structDict['CThostFtdcFutureLimitPosiParamField'] = {
+structDict.CThostFtdcFutureLimitPosiParamField = {
   // 投资者范围
   InvestorRange: 'char',
   // 经纪公司代码
@@ -4381,13 +4381,13 @@ structDict['CThostFtdcFutureLimitPosiParamField'] = {
 }
 
 // 禁止登录IP
-structDict['CThostFtdcLoginForbiddenIPField'] = {
+structDict.CThostFtdcLoginForbiddenIPField = {
   // IP地址
   IPAddress: 'string'
 }
 
 // IP列表
-structDict['CThostFtdcIPListField'] = {
+structDict.CThostFtdcIPListField = {
   // IP地址
   IPAddress: 'string',
   // 是否白名单
@@ -4395,7 +4395,7 @@ structDict['CThostFtdcIPListField'] = {
 }
 
 // 输入的期权自对冲
-structDict['CThostFtdcInputOptionSelfCloseField'] = {
+structDict.CThostFtdcInputOptionSelfCloseField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4433,7 +4433,7 @@ structDict['CThostFtdcInputOptionSelfCloseField'] = {
 }
 
 // 输入期权自对冲操作
-structDict['CThostFtdcInputOptionSelfCloseActionField'] = {
+structDict.CThostFtdcInputOptionSelfCloseActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4467,7 +4467,7 @@ structDict['CThostFtdcInputOptionSelfCloseActionField'] = {
 }
 
 // 期权自对冲
-structDict['CThostFtdcOptionSelfCloseField'] = {
+structDict.CThostFtdcOptionSelfCloseField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4551,7 +4551,7 @@ structDict['CThostFtdcOptionSelfCloseField'] = {
 }
 
 // 期权自对冲操作
-structDict['CThostFtdcOptionSelfCloseActionField'] = {
+structDict.CThostFtdcOptionSelfCloseActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4609,7 +4609,7 @@ structDict['CThostFtdcOptionSelfCloseActionField'] = {
 }
 
 // 期权自对冲查询
-structDict['CThostFtdcQryOptionSelfCloseField'] = {
+structDict.CThostFtdcQryOptionSelfCloseField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4627,7 +4627,7 @@ structDict['CThostFtdcQryOptionSelfCloseField'] = {
 }
 
 // 交易所期权自对冲信息
-structDict['CThostFtdcExchangeOptionSelfCloseField'] = {
+structDict.CThostFtdcExchangeOptionSelfCloseField = {
   // 数量
   Volume: 'int',
   // 请求编号
@@ -4683,7 +4683,7 @@ structDict['CThostFtdcExchangeOptionSelfCloseField'] = {
 }
 
 // 期权自对冲操作查询
-structDict['CThostFtdcQryOptionSelfCloseActionField'] = {
+structDict.CThostFtdcQryOptionSelfCloseActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4693,7 +4693,7 @@ structDict['CThostFtdcQryOptionSelfCloseActionField'] = {
 }
 
 // 交易所期权自对冲操作
-structDict['CThostFtdcExchangeOptionSelfCloseActionField'] = {
+structDict.CThostFtdcExchangeOptionSelfCloseActionField = {
   // 交易所代码
   ExchangeID: 'string',
   // 期权自对冲操作编号
@@ -4731,7 +4731,7 @@ structDict['CThostFtdcExchangeOptionSelfCloseActionField'] = {
 }
 
 // 延时换汇同步
-structDict['CThostFtdcSyncDelaySwapField'] = {
+structDict.CThostFtdcSyncDelaySwapField = {
   // 换汇流水号
   DelaySwapSeqNo: 'string',
   // 经纪公司代码
@@ -4753,7 +4753,7 @@ structDict['CThostFtdcSyncDelaySwapField'] = {
 }
 
 // 查询延时换汇同步
-structDict['CThostFtdcQrySyncDelaySwapField'] = {
+structDict.CThostFtdcQrySyncDelaySwapField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 延时换汇流水号
@@ -4761,7 +4761,7 @@ structDict['CThostFtdcQrySyncDelaySwapField'] = {
 }
 
 // 投资单元
-structDict['CThostFtdcInvestUnitField'] = {
+structDict.CThostFtdcInvestUnitField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4783,7 +4783,7 @@ structDict['CThostFtdcInvestUnitField'] = {
 }
 
 // 查询投资单元
-structDict['CThostFtdcQryInvestUnitField'] = {
+structDict.CThostFtdcQryInvestUnitField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -4793,7 +4793,7 @@ structDict['CThostFtdcQryInvestUnitField'] = {
 }
 
 // 二级代理商资金校验模式
-structDict['CThostFtdcSecAgentCheckModeField'] = {
+structDict.CThostFtdcSecAgentCheckModeField = {
   // 投资者代码
   InvestorID: 'string',
   // 经纪公司代码
@@ -4807,7 +4807,7 @@ structDict['CThostFtdcSecAgentCheckModeField'] = {
 }
 
 // 市场行情
-structDict['CThostFtdcMarketDataField'] = {
+structDict.CThostFtdcMarketDataField = {
   // 交易日
   TradingDay: 'string',
   // 合约代码
@@ -4857,7 +4857,7 @@ structDict['CThostFtdcMarketDataField'] = {
 }
 
 // 行情基础属性
-structDict['CThostFtdcMarketDataBaseField'] = {
+structDict.CThostFtdcMarketDataBaseField = {
   // 交易日
   TradingDay: 'string',
   // 上次结算价
@@ -4871,7 +4871,7 @@ structDict['CThostFtdcMarketDataBaseField'] = {
 }
 
 // 行情静态属性
-structDict['CThostFtdcMarketDataStaticField'] = {
+structDict.CThostFtdcMarketDataStaticField = {
   // 今开盘
   OpenPrice: 'float',
   // 最高价
@@ -4891,7 +4891,7 @@ structDict['CThostFtdcMarketDataStaticField'] = {
 }
 
 // 行情最新成交属性
-structDict['CThostFtdcMarketDataLastMatchField'] = {
+structDict.CThostFtdcMarketDataLastMatchField = {
   // 最新价
   LastPrice: 'float',
   // 数量
@@ -4903,7 +4903,7 @@ structDict['CThostFtdcMarketDataLastMatchField'] = {
 }
 
 // 行情最优价属性
-structDict['CThostFtdcMarketDataBestPriceField'] = {
+structDict.CThostFtdcMarketDataBestPriceField = {
   // 申买价一
   BidPrice1: 'float',
   // 申买量一
@@ -4915,7 +4915,7 @@ structDict['CThostFtdcMarketDataBestPriceField'] = {
 }
 
 // 行情申买二、三属性
-structDict['CThostFtdcMarketDataBid23Field'] = {
+structDict.CThostFtdcMarketDataBid23Field = {
   // 申买价二
   BidPrice2: 'float',
   // 申买量二
@@ -4927,7 +4927,7 @@ structDict['CThostFtdcMarketDataBid23Field'] = {
 }
 
 // 行情申卖二、三属性
-structDict['CThostFtdcMarketDataAsk23Field'] = {
+structDict.CThostFtdcMarketDataAsk23Field = {
   // 申卖价二
   AskPrice2: 'float',
   // 申卖量二
@@ -4939,7 +4939,7 @@ structDict['CThostFtdcMarketDataAsk23Field'] = {
 }
 
 // 行情申买四、五属性
-structDict['CThostFtdcMarketDataBid45Field'] = {
+structDict.CThostFtdcMarketDataBid45Field = {
   // 申买价四
   BidPrice4: 'float',
   // 申买量四
@@ -4951,7 +4951,7 @@ structDict['CThostFtdcMarketDataBid45Field'] = {
 }
 
 // 行情申卖四、五属性
-structDict['CThostFtdcMarketDataAsk45Field'] = {
+structDict.CThostFtdcMarketDataAsk45Field = {
   // 申卖价四
   AskPrice4: 'float',
   // 申卖量四
@@ -4963,7 +4963,7 @@ structDict['CThostFtdcMarketDataAsk45Field'] = {
 }
 
 // 行情更新时间属性
-structDict['CThostFtdcMarketDataUpdateTimeField'] = {
+structDict.CThostFtdcMarketDataUpdateTimeField = {
   // 合约代码
   InstrumentID: 'string',
   // 最后修改时间
@@ -4975,19 +4975,19 @@ structDict['CThostFtdcMarketDataUpdateTimeField'] = {
 }
 
 // 行情交易所代码属性
-structDict['CThostFtdcMarketDataExchangeField'] = {
+structDict.CThostFtdcMarketDataExchangeField = {
   // 交易所代码
   ExchangeID: 'string'
 }
 
 // 指定的合约
-structDict['CThostFtdcSpecificInstrumentField'] = {
+structDict.CThostFtdcSpecificInstrumentField = {
   // 合约代码
   InstrumentID: 'string'
 }
 
 // 合约状态
-structDict['CThostFtdcInstrumentStatusField'] = {
+structDict.CThostFtdcInstrumentStatusField = {
   // 交易所代码
   ExchangeID: 'string',
   // 合约在交易所的代码
@@ -5007,7 +5007,7 @@ structDict['CThostFtdcInstrumentStatusField'] = {
 }
 
 // 查询合约状态
-structDict['CThostFtdcQryInstrumentStatusField'] = {
+structDict.CThostFtdcQryInstrumentStatusField = {
   // 交易所代码
   ExchangeID: 'string',
   // 合约在交易所的代码
@@ -5015,7 +5015,7 @@ structDict['CThostFtdcQryInstrumentStatusField'] = {
 }
 
 // 投资者账户
-structDict['CThostFtdcInvestorAccountField'] = {
+structDict.CThostFtdcInvestorAccountField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5027,7 +5027,7 @@ structDict['CThostFtdcInvestorAccountField'] = {
 }
 
 // 浮动盈亏算法
-structDict['CThostFtdcPositionProfitAlgorithmField'] = {
+structDict.CThostFtdcPositionProfitAlgorithmField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -5041,7 +5041,7 @@ structDict['CThostFtdcPositionProfitAlgorithmField'] = {
 }
 
 // 会员资金折扣
-structDict['CThostFtdcDiscountField'] = {
+structDict.CThostFtdcDiscountField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者范围
@@ -5053,7 +5053,7 @@ structDict['CThostFtdcDiscountField'] = {
 }
 
 // 查询转帐银行
-structDict['CThostFtdcQryTransferBankField'] = {
+structDict.CThostFtdcQryTransferBankField = {
   // 银行代码
   BankID: 'string',
   // 银行分中心代码
@@ -5061,7 +5061,7 @@ structDict['CThostFtdcQryTransferBankField'] = {
 }
 
 // 转帐银行
-structDict['CThostFtdcTransferBankField'] = {
+structDict.CThostFtdcTransferBankField = {
   // 银行代码
   BankID: 'string',
   // 银行分中心代码
@@ -5073,7 +5073,7 @@ structDict['CThostFtdcTransferBankField'] = {
 }
 
 // 查询投资者持仓明细
-structDict['CThostFtdcQryInvestorPositionDetailField'] = {
+structDict.CThostFtdcQryInvestorPositionDetailField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5087,7 +5087,7 @@ structDict['CThostFtdcQryInvestorPositionDetailField'] = {
 }
 
 // 投资者持仓明细
-structDict['CThostFtdcInvestorPositionDetailField'] = {
+structDict.CThostFtdcInvestorPositionDetailField = {
   // 合约代码
   InstrumentID: 'string',
   // 经纪公司代码
@@ -5145,7 +5145,7 @@ structDict['CThostFtdcInvestorPositionDetailField'] = {
 }
 
 // 资金账户口令域
-structDict['CThostFtdcTradingAccountPasswordField'] = {
+structDict.CThostFtdcTradingAccountPasswordField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -5157,7 +5157,7 @@ structDict['CThostFtdcTradingAccountPasswordField'] = {
 }
 
 // 交易所行情报盘机
-structDict['CThostFtdcMDTraderOfferField'] = {
+structDict.CThostFtdcMDTraderOfferField = {
   // 交易所代码
   ExchangeID: 'string',
   // 交易所交易员代码
@@ -5199,7 +5199,7 @@ structDict['CThostFtdcMDTraderOfferField'] = {
 }
 
 // 查询行情报盘机
-structDict['CThostFtdcQryMDTraderOfferField'] = {
+structDict.CThostFtdcQryMDTraderOfferField = {
   // 交易所代码
   ExchangeID: 'string',
   // 会员代码
@@ -5209,13 +5209,13 @@ structDict['CThostFtdcQryMDTraderOfferField'] = {
 }
 
 // 查询客户通知
-structDict['CThostFtdcQryNoticeField'] = {
+structDict.CThostFtdcQryNoticeField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 客户通知
-structDict['CThostFtdcNoticeField'] = {
+structDict.CThostFtdcNoticeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 消息正文
@@ -5225,7 +5225,7 @@ structDict['CThostFtdcNoticeField'] = {
 }
 
 // 用户权限
-structDict['CThostFtdcUserRightField'] = {
+structDict.CThostFtdcUserRightField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -5237,7 +5237,7 @@ structDict['CThostFtdcUserRightField'] = {
 }
 
 // 查询结算信息确认域
-structDict['CThostFtdcQrySettlementInfoConfirmField'] = {
+structDict.CThostFtdcQrySettlementInfoConfirmField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5249,13 +5249,13 @@ structDict['CThostFtdcQrySettlementInfoConfirmField'] = {
 }
 
 // 装载结算信息
-structDict['CThostFtdcLoadSettlementInfoField'] = {
+structDict.CThostFtdcLoadSettlementInfoField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 经纪公司可提资金算法表
-structDict['CThostFtdcBrokerWithdrawAlgorithmField'] = {
+structDict.CThostFtdcBrokerWithdrawAlgorithmField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 可提资金算法
@@ -5279,7 +5279,7 @@ structDict['CThostFtdcBrokerWithdrawAlgorithmField'] = {
 }
 
 // 资金账户口令变更域
-structDict['CThostFtdcTradingAccountPasswordUpdateV1Field'] = {
+structDict.CThostFtdcTradingAccountPasswordUpdateV1Field = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5291,7 +5291,7 @@ structDict['CThostFtdcTradingAccountPasswordUpdateV1Field'] = {
 }
 
 // 资金账户口令变更域
-structDict['CThostFtdcTradingAccountPasswordUpdateField'] = {
+structDict.CThostFtdcTradingAccountPasswordUpdateField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -5305,7 +5305,7 @@ structDict['CThostFtdcTradingAccountPasswordUpdateField'] = {
 }
 
 // 查询组合合约分腿
-structDict['CThostFtdcQryCombinationLegField'] = {
+structDict.CThostFtdcQryCombinationLegField = {
   // 组合合约代码
   CombInstrumentID: 'string',
   // 单腿编号
@@ -5315,13 +5315,13 @@ structDict['CThostFtdcQryCombinationLegField'] = {
 }
 
 // 查询组合合约分腿
-structDict['CThostFtdcQrySyncStatusField'] = {
+structDict.CThostFtdcQrySyncStatusField = {
   // 交易日
   TradingDay: 'string'
 }
 
 // 组合交易合约的单腿
-structDict['CThostFtdcCombinationLegField'] = {
+structDict.CThostFtdcCombinationLegField = {
   // 组合合约代码
   CombInstrumentID: 'string',
   // 单腿编号
@@ -5337,7 +5337,7 @@ structDict['CThostFtdcCombinationLegField'] = {
 }
 
 // 数据同步状态
-structDict['CThostFtdcSyncStatusField'] = {
+structDict.CThostFtdcSyncStatusField = {
   // 交易日
   TradingDay: 'string',
   // 数据同步状态
@@ -5345,7 +5345,7 @@ structDict['CThostFtdcSyncStatusField'] = {
 }
 
 // 查询联系人
-structDict['CThostFtdcQryLinkManField'] = {
+structDict.CThostFtdcQryLinkManField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5353,7 +5353,7 @@ structDict['CThostFtdcQryLinkManField'] = {
 }
 
 // 联系人
-structDict['CThostFtdcLinkManField'] = {
+structDict.CThostFtdcLinkManField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5381,7 +5381,7 @@ structDict['CThostFtdcLinkManField'] = {
 }
 
 // 查询经纪公司用户事件
-structDict['CThostFtdcQryBrokerUserEventField'] = {
+structDict.CThostFtdcQryBrokerUserEventField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -5391,7 +5391,7 @@ structDict['CThostFtdcQryBrokerUserEventField'] = {
 }
 
 // 查询经纪公司用户事件
-structDict['CThostFtdcBrokerUserEventField'] = {
+structDict.CThostFtdcBrokerUserEventField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -5413,7 +5413,7 @@ structDict['CThostFtdcBrokerUserEventField'] = {
 }
 
 // 查询签约银行请求
-structDict['CThostFtdcQryContractBankField'] = {
+structDict.CThostFtdcQryContractBankField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 银行代码
@@ -5423,7 +5423,7 @@ structDict['CThostFtdcQryContractBankField'] = {
 }
 
 // 查询签约银行响应
-structDict['CThostFtdcContractBankField'] = {
+structDict.CThostFtdcContractBankField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 银行代码
@@ -5435,7 +5435,7 @@ structDict['CThostFtdcContractBankField'] = {
 }
 
 // 投资者组合持仓明细
-structDict['CThostFtdcInvestorPositionCombineDetailField'] = {
+structDict.CThostFtdcInvestorPositionCombineDetailField = {
   // 交易日
   TradingDay: 'string',
   // 开仓日期
@@ -5481,7 +5481,7 @@ structDict['CThostFtdcInvestorPositionCombineDetailField'] = {
 }
 
 // 预埋单
-structDict['CThostFtdcParkedOrderField'] = {
+structDict.CThostFtdcParkedOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5555,7 +5555,7 @@ structDict['CThostFtdcParkedOrderField'] = {
 }
 
 // 输入预埋单操作
-structDict['CThostFtdcParkedOrderActionField'] = {
+structDict.CThostFtdcParkedOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5603,7 +5603,7 @@ structDict['CThostFtdcParkedOrderActionField'] = {
 }
 
 // 查询预埋单
-structDict['CThostFtdcQryParkedOrderField'] = {
+structDict.CThostFtdcQryParkedOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5617,7 +5617,7 @@ structDict['CThostFtdcQryParkedOrderField'] = {
 }
 
 // 查询预埋撤单
-structDict['CThostFtdcQryParkedOrderActionField'] = {
+structDict.CThostFtdcQryParkedOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5631,7 +5631,7 @@ structDict['CThostFtdcQryParkedOrderActionField'] = {
 }
 
 // 删除预埋单
-structDict['CThostFtdcRemoveParkedOrderField'] = {
+structDict.CThostFtdcRemoveParkedOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5643,7 +5643,7 @@ structDict['CThostFtdcRemoveParkedOrderField'] = {
 }
 
 // 删除预埋撤单
-structDict['CThostFtdcRemoveParkedOrderActionField'] = {
+structDict.CThostFtdcRemoveParkedOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5655,7 +5655,7 @@ structDict['CThostFtdcRemoveParkedOrderActionField'] = {
 }
 
 // 经纪公司可提资金算法表
-structDict['CThostFtdcInvestorWithdrawAlgorithmField'] = {
+structDict.CThostFtdcInvestorWithdrawAlgorithmField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者范围
@@ -5671,7 +5671,7 @@ structDict['CThostFtdcInvestorWithdrawAlgorithmField'] = {
 }
 
 // 查询组合持仓明细
-structDict['CThostFtdcQryInvestorPositionCombineDetailField'] = {
+structDict.CThostFtdcQryInvestorPositionCombineDetailField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5685,13 +5685,13 @@ structDict['CThostFtdcQryInvestorPositionCombineDetailField'] = {
 }
 
 // 成交均价
-structDict['CThostFtdcMarketDataAveragePriceField'] = {
+structDict.CThostFtdcMarketDataAveragePriceField = {
   // 当日均价
   AveragePrice: 'float'
 }
 
 // 校验投资者密码
-structDict['CThostFtdcVerifyInvestorPasswordField'] = {
+structDict.CThostFtdcVerifyInvestorPasswordField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5701,7 +5701,7 @@ structDict['CThostFtdcVerifyInvestorPasswordField'] = {
 }
 
 // 用户IP
-structDict['CThostFtdcUserIPField'] = {
+structDict.CThostFtdcUserIPField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -5715,7 +5715,7 @@ structDict['CThostFtdcUserIPField'] = {
 }
 
 // 用户事件通知信息
-structDict['CThostFtdcTradingNoticeInfoField'] = {
+structDict.CThostFtdcTradingNoticeInfoField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5733,7 +5733,7 @@ structDict['CThostFtdcTradingNoticeInfoField'] = {
 }
 
 // 用户事件通知
-structDict['CThostFtdcTradingNoticeField'] = {
+structDict.CThostFtdcTradingNoticeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者范围
@@ -5755,7 +5755,7 @@ structDict['CThostFtdcTradingNoticeField'] = {
 }
 
 // 查询交易事件通知
-structDict['CThostFtdcQryTradingNoticeField'] = {
+structDict.CThostFtdcQryTradingNoticeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5765,7 +5765,7 @@ structDict['CThostFtdcQryTradingNoticeField'] = {
 }
 
 // 查询错误报单
-structDict['CThostFtdcQryErrOrderField'] = {
+structDict.CThostFtdcQryErrOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5773,7 +5773,7 @@ structDict['CThostFtdcQryErrOrderField'] = {
 }
 
 // 错误报单
-structDict['CThostFtdcErrOrderField'] = {
+structDict.CThostFtdcErrOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5841,7 +5841,7 @@ structDict['CThostFtdcErrOrderField'] = {
 }
 
 // 查询错误报单操作
-structDict['CThostFtdcErrorConditionalOrderField'] = {
+structDict.CThostFtdcErrorConditionalOrderField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5975,7 +5975,7 @@ structDict['CThostFtdcErrorConditionalOrderField'] = {
 }
 
 // 查询错误报单操作
-structDict['CThostFtdcQryErrOrderActionField'] = {
+structDict.CThostFtdcQryErrOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -5983,7 +5983,7 @@ structDict['CThostFtdcQryErrOrderActionField'] = {
 }
 
 // 错误报单操作
-structDict['CThostFtdcErrOrderActionField'] = {
+structDict.CThostFtdcErrOrderActionField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6049,13 +6049,13 @@ structDict['CThostFtdcErrOrderActionField'] = {
 }
 
 // 查询交易所状态
-structDict['CThostFtdcQryExchangeSequenceField'] = {
+structDict.CThostFtdcQryExchangeSequenceField = {
   // 交易所代码
   ExchangeID: 'string'
 }
 
 // 交易所状态
-structDict['CThostFtdcExchangeSequenceField'] = {
+structDict.CThostFtdcExchangeSequenceField = {
   // 交易所代码
   ExchangeID: 'string',
   // 序号
@@ -6065,7 +6065,7 @@ structDict['CThostFtdcExchangeSequenceField'] = {
 }
 
 // 根据价格查询最大报单数量
-structDict['CThostFtdcQueryMaxOrderVolumeWithPriceField'] = {
+structDict.CThostFtdcQueryMaxOrderVolumeWithPriceField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6089,7 +6089,7 @@ structDict['CThostFtdcQueryMaxOrderVolumeWithPriceField'] = {
 }
 
 // 查询经纪公司交易参数
-structDict['CThostFtdcQryBrokerTradingParamsField'] = {
+structDict.CThostFtdcQryBrokerTradingParamsField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6101,7 +6101,7 @@ structDict['CThostFtdcQryBrokerTradingParamsField'] = {
 }
 
 // 经纪公司交易参数
-structDict['CThostFtdcBrokerTradingParamsField'] = {
+structDict.CThostFtdcBrokerTradingParamsField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6121,7 +6121,7 @@ structDict['CThostFtdcBrokerTradingParamsField'] = {
 }
 
 // 查询经纪公司交易算法
-structDict['CThostFtdcQryBrokerTradingAlgosField'] = {
+structDict.CThostFtdcQryBrokerTradingAlgosField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 交易所代码
@@ -6131,7 +6131,7 @@ structDict['CThostFtdcQryBrokerTradingAlgosField'] = {
 }
 
 // 经纪公司交易算法
-structDict['CThostFtdcBrokerTradingAlgosField'] = {
+structDict.CThostFtdcBrokerTradingAlgosField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 交易所代码
@@ -6147,7 +6147,7 @@ structDict['CThostFtdcBrokerTradingAlgosField'] = {
 }
 
 // 查询经纪公司资金
-structDict['CThostFtdcQueryBrokerDepositField'] = {
+structDict.CThostFtdcQueryBrokerDepositField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 交易所代码
@@ -6155,7 +6155,7 @@ structDict['CThostFtdcQueryBrokerDepositField'] = {
 }
 
 // 经纪公司资金
-structDict['CThostFtdcBrokerDepositField'] = {
+structDict.CThostFtdcBrokerDepositField = {
   // 交易日期
   TradingDay: 'string',
   // 经纪公司代码
@@ -6185,13 +6185,13 @@ structDict['CThostFtdcBrokerDepositField'] = {
 }
 
 // 查询保证金监管系统经纪公司密钥
-structDict['CThostFtdcQryCFMMCBrokerKeyField'] = {
+structDict.CThostFtdcQryCFMMCBrokerKeyField = {
   // 经纪公司代码
   BrokerID: 'string'
 }
 
 // 保证金监管系统经纪公司密钥
-structDict['CThostFtdcCFMMCBrokerKeyField'] = {
+structDict.CThostFtdcCFMMCBrokerKeyField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 经纪公司统一编码
@@ -6209,7 +6209,7 @@ structDict['CThostFtdcCFMMCBrokerKeyField'] = {
 }
 
 // 保证金监管系统经纪公司资金账户密钥
-structDict['CThostFtdcCFMMCTradingAccountKeyField'] = {
+structDict.CThostFtdcCFMMCTradingAccountKeyField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 经纪公司统一编码
@@ -6223,7 +6223,7 @@ structDict['CThostFtdcCFMMCTradingAccountKeyField'] = {
 }
 
 // 请求查询保证金监管系统经纪公司资金账户密钥
-structDict['CThostFtdcQryCFMMCTradingAccountKeyField'] = {
+structDict.CThostFtdcQryCFMMCTradingAccountKeyField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6231,7 +6231,7 @@ structDict['CThostFtdcQryCFMMCTradingAccountKeyField'] = {
 }
 
 // 用户动态令牌参数
-structDict['CThostFtdcBrokerUserOTPParamField'] = {
+structDict.CThostFtdcBrokerUserOTPParamField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -6251,7 +6251,7 @@ structDict['CThostFtdcBrokerUserOTPParamField'] = {
 }
 
 // 手工同步用户动态令牌
-structDict['CThostFtdcManualSyncBrokerUserOTPField'] = {
+structDict.CThostFtdcManualSyncBrokerUserOTPField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -6265,7 +6265,7 @@ structDict['CThostFtdcManualSyncBrokerUserOTPField'] = {
 }
 
 // 投资者手续费率模板
-structDict['CThostFtdcCommRateModelField'] = {
+structDict.CThostFtdcCommRateModelField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 手续费率模板代码
@@ -6275,7 +6275,7 @@ structDict['CThostFtdcCommRateModelField'] = {
 }
 
 // 请求查询投资者手续费率模板
-structDict['CThostFtdcQryCommRateModelField'] = {
+structDict.CThostFtdcQryCommRateModelField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 手续费率模板代码
@@ -6283,7 +6283,7 @@ structDict['CThostFtdcQryCommRateModelField'] = {
 }
 
 // 投资者保证金率模板
-structDict['CThostFtdcMarginModelField'] = {
+structDict.CThostFtdcMarginModelField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 保证金率模板代码
@@ -6293,7 +6293,7 @@ structDict['CThostFtdcMarginModelField'] = {
 }
 
 // 请求查询投资者保证金率模板
-structDict['CThostFtdcQryMarginModelField'] = {
+structDict.CThostFtdcQryMarginModelField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 保证金率模板代码
@@ -6301,7 +6301,7 @@ structDict['CThostFtdcQryMarginModelField'] = {
 }
 
 // 仓单折抵信息
-structDict['CThostFtdcEWarrantOffsetField'] = {
+structDict.CThostFtdcEWarrantOffsetField = {
   // 交易日期
   TradingDay: 'string',
   // 经纪公司代码
@@ -6323,7 +6323,7 @@ structDict['CThostFtdcEWarrantOffsetField'] = {
 }
 
 // 查询仓单折抵信息
-structDict['CThostFtdcQryEWarrantOffsetField'] = {
+structDict.CThostFtdcQryEWarrantOffsetField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6337,7 +6337,7 @@ structDict['CThostFtdcQryEWarrantOffsetField'] = {
 }
 
 // 查询投资者品种/跨品种保证金
-structDict['CThostFtdcQryInvestorProductGroupMarginField'] = {
+structDict.CThostFtdcQryInvestorProductGroupMarginField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6353,7 +6353,7 @@ structDict['CThostFtdcQryInvestorProductGroupMarginField'] = {
 }
 
 // 投资者品种/跨品种保证金
-structDict['CThostFtdcInvestorProductGroupMarginField'] = {
+structDict.CThostFtdcInvestorProductGroupMarginField = {
   // 品种/跨品种标示
   ProductGroupID: 'string',
   // 经纪公司代码
@@ -6415,7 +6415,7 @@ structDict['CThostFtdcInvestorProductGroupMarginField'] = {
 }
 
 // 查询监控中心用户令牌
-structDict['CThostFtdcQueryCFMMCTradingAccountTokenField'] = {
+structDict.CThostFtdcQueryCFMMCTradingAccountTokenField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码
@@ -6425,7 +6425,7 @@ structDict['CThostFtdcQueryCFMMCTradingAccountTokenField'] = {
 }
 
 // 监控中心用户令牌
-structDict['CThostFtdcCFMMCTradingAccountTokenField'] = {
+structDict.CThostFtdcCFMMCTradingAccountTokenField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 经纪公司统一编码
@@ -6439,7 +6439,7 @@ structDict['CThostFtdcCFMMCTradingAccountTokenField'] = {
 }
 
 // 查询产品组
-structDict['CThostFtdcQryProductGroupField'] = {
+structDict.CThostFtdcQryProductGroupField = {
   // 产品代码
   ProductID: 'string',
   // 交易所代码
@@ -6447,7 +6447,7 @@ structDict['CThostFtdcQryProductGroupField'] = {
 }
 
 // 投资者品种/跨品种保证金产品组
-structDict['CThostFtdcProductGroupField'] = {
+structDict.CThostFtdcProductGroupField = {
   // 产品代码
   ProductID: 'string',
   // 交易所代码
@@ -6457,7 +6457,7 @@ structDict['CThostFtdcProductGroupField'] = {
 }
 
 // 交易所公告
-structDict['CThostFtdcBulletinField'] = {
+structDict.CThostFtdcBulletinField = {
   // 交易所代码
   ExchangeID: 'string',
   // 交易日
@@ -6485,7 +6485,7 @@ structDict['CThostFtdcBulletinField'] = {
 }
 
 // 查询交易所公告
-structDict['CThostFtdcQryBulletinField'] = {
+structDict.CThostFtdcQryBulletinField = {
   // 交易所代码
   ExchangeID: 'string',
   // 公告编号
@@ -6499,7 +6499,7 @@ structDict['CThostFtdcQryBulletinField'] = {
 }
 
 // 转帐开户请求
-structDict['CThostFtdcReqOpenAccountField'] = {
+structDict.CThostFtdcReqOpenAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -6593,7 +6593,7 @@ structDict['CThostFtdcReqOpenAccountField'] = {
 }
 
 // 转帐销户请求
-structDict['CThostFtdcReqCancelAccountField'] = {
+structDict.CThostFtdcReqCancelAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -6687,7 +6687,7 @@ structDict['CThostFtdcReqCancelAccountField'] = {
 }
 
 // 变更银行账户请求
-structDict['CThostFtdcReqChangeAccountField'] = {
+structDict.CThostFtdcReqChangeAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -6773,7 +6773,7 @@ structDict['CThostFtdcReqChangeAccountField'] = {
 }
 
 // 转账请求
-structDict['CThostFtdcReqTransferField'] = {
+structDict.CThostFtdcReqTransferField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -6865,7 +6865,7 @@ structDict['CThostFtdcReqTransferField'] = {
 }
 
 // 银行发起银行资金转期货响应
-structDict['CThostFtdcRspTransferField'] = {
+structDict.CThostFtdcRspTransferField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -6961,7 +6961,7 @@ structDict['CThostFtdcRspTransferField'] = {
 }
 
 // 冲正请求
-structDict['CThostFtdcReqRepealField'] = {
+structDict.CThostFtdcReqRepealField = {
   // 冲正时间间隔
   RepealTimeInterval: 'int',
   // 已经冲正次数
@@ -7067,7 +7067,7 @@ structDict['CThostFtdcReqRepealField'] = {
 }
 
 // 冲正响应
-structDict['CThostFtdcRspRepealField'] = {
+structDict.CThostFtdcRspRepealField = {
   // 冲正时间间隔
   RepealTimeInterval: 'int',
   // 已经冲正次数
@@ -7177,7 +7177,7 @@ structDict['CThostFtdcRspRepealField'] = {
 }
 
 // 查询账户信息请求
-structDict['CThostFtdcReqQueryAccountField'] = {
+structDict.CThostFtdcReqQueryAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7255,7 +7255,7 @@ structDict['CThostFtdcReqQueryAccountField'] = {
 }
 
 // 查询账户信息响应
-structDict['CThostFtdcRspQueryAccountField'] = {
+structDict.CThostFtdcRspQueryAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7337,7 +7337,7 @@ structDict['CThostFtdcRspQueryAccountField'] = {
 }
 
 // 期商签到签退
-structDict['CThostFtdcFutureSignIOField'] = {
+structDict.CThostFtdcFutureSignIOField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7383,7 +7383,7 @@ structDict['CThostFtdcFutureSignIOField'] = {
 }
 
 // 期商签到响应
-structDict['CThostFtdcRspFutureSignInField'] = {
+structDict.CThostFtdcRspFutureSignInField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7437,7 +7437,7 @@ structDict['CThostFtdcRspFutureSignInField'] = {
 }
 
 // 期商签退请求
-structDict['CThostFtdcReqFutureSignOutField'] = {
+structDict.CThostFtdcReqFutureSignOutField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7483,7 +7483,7 @@ structDict['CThostFtdcReqFutureSignOutField'] = {
 }
 
 // 期商签退响应
-structDict['CThostFtdcRspFutureSignOutField'] = {
+structDict.CThostFtdcRspFutureSignOutField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7533,7 +7533,7 @@ structDict['CThostFtdcRspFutureSignOutField'] = {
 }
 
 // 查询指定流水号的交易结果请求
-structDict['CThostFtdcReqQueryTradeResultBySerialField'] = {
+structDict.CThostFtdcReqQueryTradeResultBySerialField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7591,7 +7591,7 @@ structDict['CThostFtdcReqQueryTradeResultBySerialField'] = {
 }
 
 // 查询指定流水号的交易结果响应
-structDict['CThostFtdcRspQueryTradeResultBySerialField'] = {
+structDict.CThostFtdcRspQueryTradeResultBySerialField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7647,7 +7647,7 @@ structDict['CThostFtdcRspQueryTradeResultBySerialField'] = {
 }
 
 // 日终文件就绪请求
-structDict['CThostFtdcReqDayEndFileReadyField'] = {
+structDict.CThostFtdcReqDayEndFileReadyField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7679,7 +7679,7 @@ structDict['CThostFtdcReqDayEndFileReadyField'] = {
 }
 
 // 返回结果
-structDict['CThostFtdcReturnResultField'] = {
+structDict.CThostFtdcReturnResultField = {
   // 返回代码
   ReturnCode: 'string',
   // 返回码描述
@@ -7687,7 +7687,7 @@ structDict['CThostFtdcReturnResultField'] = {
 }
 
 // 验证期货资金密码
-structDict['CThostFtdcVerifyFuturePasswordField'] = {
+structDict.CThostFtdcVerifyFuturePasswordField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7729,7 +7729,7 @@ structDict['CThostFtdcVerifyFuturePasswordField'] = {
 }
 
 // 验证客户信息
-structDict['CThostFtdcVerifyCustInfoField'] = {
+structDict.CThostFtdcVerifyCustInfoField = {
   // 客户姓名
   CustomerName: 'string',
   // 证件类型
@@ -7743,7 +7743,7 @@ structDict['CThostFtdcVerifyCustInfoField'] = {
 }
 
 // 验证期货资金密码和客户信息
-structDict['CThostFtdcVerifyFuturePasswordAndCustInfoField'] = {
+structDict.CThostFtdcVerifyFuturePasswordAndCustInfoField = {
   // 客户姓名
   CustomerName: 'string',
   // 证件类型
@@ -7763,7 +7763,7 @@ structDict['CThostFtdcVerifyFuturePasswordAndCustInfoField'] = {
 }
 
 // 验证期货资金密码和客户信息
-structDict['CThostFtdcDepositResultInformField'] = {
+structDict.CThostFtdcDepositResultInformField = {
   // 出入金流水号，该流水号为银期报盘返回的流水号
   DepositSeqNo: 'string',
   // 经纪公司代码
@@ -7781,7 +7781,7 @@ structDict['CThostFtdcDepositResultInformField'] = {
 }
 
 // 交易核心向银期报盘发出密钥同步请求
-structDict['CThostFtdcReqSyncKeyField'] = {
+structDict.CThostFtdcReqSyncKeyField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7825,7 +7825,7 @@ structDict['CThostFtdcReqSyncKeyField'] = {
 }
 
 // 交易核心向银期报盘发出密钥同步响应
-structDict['CThostFtdcRspSyncKeyField'] = {
+structDict.CThostFtdcRspSyncKeyField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7873,7 +7873,7 @@ structDict['CThostFtdcRspSyncKeyField'] = {
 }
 
 // 查询账户信息通知
-structDict['CThostFtdcNotifyQueryAccountField'] = {
+structDict.CThostFtdcNotifyQueryAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -7959,7 +7959,7 @@ structDict['CThostFtdcNotifyQueryAccountField'] = {
 }
 
 // 银期转账交易流水表
-structDict['CThostFtdcTransferSerialField'] = {
+structDict.CThostFtdcTransferSerialField = {
   // 平台流水号
   PlateSerial: 'int',
   // 交易发起方日期
@@ -8019,7 +8019,7 @@ structDict['CThostFtdcTransferSerialField'] = {
 }
 
 // 请求查询转帐流水
-structDict['CThostFtdcQryTransferSerialField'] = {
+structDict.CThostFtdcQryTransferSerialField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -8031,7 +8031,7 @@ structDict['CThostFtdcQryTransferSerialField'] = {
 }
 
 // 期商签到通知
-structDict['CThostFtdcNotifyFutureSignInField'] = {
+structDict.CThostFtdcNotifyFutureSignInField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8085,7 +8085,7 @@ structDict['CThostFtdcNotifyFutureSignInField'] = {
 }
 
 // 期商签退通知
-structDict['CThostFtdcNotifyFutureSignOutField'] = {
+structDict.CThostFtdcNotifyFutureSignOutField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8135,7 +8135,7 @@ structDict['CThostFtdcNotifyFutureSignOutField'] = {
 }
 
 // 交易核心向银期报盘发出密钥同步处理结果的通知
-structDict['CThostFtdcNotifySyncKeyField'] = {
+structDict.CThostFtdcNotifySyncKeyField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8183,7 +8183,7 @@ structDict['CThostFtdcNotifySyncKeyField'] = {
 }
 
 // 请求查询银期签约关系
-structDict['CThostFtdcQryAccountregisterField'] = {
+structDict.CThostFtdcQryAccountregisterField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -8197,7 +8197,7 @@ structDict['CThostFtdcQryAccountregisterField'] = {
 }
 
 // 客户开销户信息表
-structDict['CThostFtdcAccountregisterField'] = {
+structDict.CThostFtdcAccountregisterField = {
   // 交易日期
   TradeDay: 'string',
   // 银行编码
@@ -8237,7 +8237,7 @@ structDict['CThostFtdcAccountregisterField'] = {
 }
 
 // 银期开户信息
-structDict['CThostFtdcOpenAccountField'] = {
+structDict.CThostFtdcOpenAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8335,7 +8335,7 @@ structDict['CThostFtdcOpenAccountField'] = {
 }
 
 // 银期销户信息
-structDict['CThostFtdcCancelAccountField'] = {
+structDict.CThostFtdcCancelAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8433,7 +8433,7 @@ structDict['CThostFtdcCancelAccountField'] = {
 }
 
 // 银期变更银行账号信息
-structDict['CThostFtdcChangeAccountField'] = {
+structDict.CThostFtdcChangeAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8523,7 +8523,7 @@ structDict['CThostFtdcChangeAccountField'] = {
 }
 
 // 二级代理操作员银期权限
-structDict['CThostFtdcSecAgentACIDMapField'] = {
+structDict.CThostFtdcSecAgentACIDMapField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -8537,7 +8537,7 @@ structDict['CThostFtdcSecAgentACIDMapField'] = {
 }
 
 // 二级代理操作员银期权限查询
-structDict['CThostFtdcQrySecAgentACIDMapField'] = {
+structDict.CThostFtdcQrySecAgentACIDMapField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -8549,7 +8549,7 @@ structDict['CThostFtdcQrySecAgentACIDMapField'] = {
 }
 
 // 灾备中心交易权限
-structDict['CThostFtdcUserRightsAssignField'] = {
+structDict.CThostFtdcUserRightsAssignField = {
   // 应用单元代码
   BrokerID: 'string',
   // 用户代码
@@ -8559,7 +8559,7 @@ structDict['CThostFtdcUserRightsAssignField'] = {
 }
 
 // 经济公司是否有在本标示的交易权限
-structDict['CThostFtdcBrokerUserRightAssignField'] = {
+structDict.CThostFtdcBrokerUserRightAssignField = {
   // 应用单元代码
   BrokerID: 'string',
   // 交易中心代码
@@ -8569,7 +8569,7 @@ structDict['CThostFtdcBrokerUserRightAssignField'] = {
 }
 
 // 灾备交易转换报文
-structDict['CThostFtdcDRTransferField'] = {
+structDict.CThostFtdcDRTransferField = {
   // 原交易中心代码
   OrigDRIdentityID: 'int',
   // 目标交易中心代码
@@ -8581,7 +8581,7 @@ structDict['CThostFtdcDRTransferField'] = {
 }
 
 // Fens用户信息
-structDict['CThostFtdcFensUserInfoField'] = {
+structDict.CThostFtdcFensUserInfoField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -8591,13 +8591,13 @@ structDict['CThostFtdcFensUserInfoField'] = {
 }
 
 // 当前银期所属交易中心
-structDict['CThostFtdcCurrTransferIdentityField'] = {
+structDict.CThostFtdcCurrTransferIdentityField = {
   // 交易中心代码
   IdentityID: 'int'
 }
 
 // 禁止登录用户
-structDict['CThostFtdcLoginForbiddenUserField'] = {
+structDict.CThostFtdcLoginForbiddenUserField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -8607,7 +8607,7 @@ structDict['CThostFtdcLoginForbiddenUserField'] = {
 }
 
 // 查询禁止登录用户
-structDict['CThostFtdcQryLoginForbiddenUserField'] = {
+structDict.CThostFtdcQryLoginForbiddenUserField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 用户代码
@@ -8615,7 +8615,7 @@ structDict['CThostFtdcQryLoginForbiddenUserField'] = {
 }
 
 // UDP组播组信息
-structDict['CThostFtdcMulticastGroupInfoField'] = {
+structDict.CThostFtdcMulticastGroupInfoField = {
   // 组播组IP地址
   GroupIP: 'string',
   // 组播组IP端口
@@ -8625,7 +8625,7 @@ structDict['CThostFtdcMulticastGroupInfoField'] = {
 }
 
 // 资金账户基本准备金
-structDict['CThostFtdcTradingAccountReserveField'] = {
+structDict.CThostFtdcTradingAccountReserveField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -8637,19 +8637,19 @@ structDict['CThostFtdcTradingAccountReserveField'] = {
 }
 
 // 查询禁止登录IP
-structDict['CThostFtdcQryLoginForbiddenIPField'] = {
+structDict.CThostFtdcQryLoginForbiddenIPField = {
   // IP地址
   IPAddress: 'string'
 }
 
 // 查询IP列表
-structDict['CThostFtdcQryIPListField'] = {
+structDict.CThostFtdcQryIPListField = {
   // IP地址
   IPAddress: 'string'
 }
 
 // 查询用户下单权限分配表
-structDict['CThostFtdcQryUserRightsAssignField'] = {
+structDict.CThostFtdcQryUserRightsAssignField = {
   // 应用单元代码
   BrokerID: 'string',
   // 用户代码
@@ -8657,7 +8657,7 @@ structDict['CThostFtdcQryUserRightsAssignField'] = {
 }
 
 // 银期预约开户确认请求
-structDict['CThostFtdcReserveOpenAccountConfirmField'] = {
+structDict.CThostFtdcReserveOpenAccountConfirmField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8743,7 +8743,7 @@ structDict['CThostFtdcReserveOpenAccountConfirmField'] = {
 }
 
 // 银期预约开户
-structDict['CThostFtdcReserveOpenAccountField'] = {
+structDict.CThostFtdcReserveOpenAccountField = {
   // 业务功能码
   TradeCode: 'string',
   // 银行代码
@@ -8821,7 +8821,7 @@ structDict['CThostFtdcReserveOpenAccountField'] = {
 }
 
 // 银行账户属性
-structDict['CThostFtdcAccountPropertyField'] = {
+structDict.CThostFtdcAccountPropertyField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者帐号
@@ -8853,19 +8853,19 @@ structDict['CThostFtdcAccountPropertyField'] = {
 }
 
 // 查询当前交易中心
-structDict['CThostFtdcQryCurrDRIdentityField'] = {
+structDict.CThostFtdcQryCurrDRIdentityField = {
   // 交易中心代码
   DRIdentityID: 'int'
 }
 
 // 当前交易中心
-structDict['CThostFtdcCurrDRIdentityField'] = {
+structDict.CThostFtdcCurrDRIdentityField = {
   // 交易中心代码
   DRIdentityID: 'int'
 }
 
 // 查询二级代理商资金校验模式
-structDict['CThostFtdcQrySecAgentCheckModeField'] = {
+structDict.CThostFtdcQrySecAgentCheckModeField = {
   // 经纪公司代码
   BrokerID: 'string',
   // 投资者代码

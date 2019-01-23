@@ -30,5 +30,8 @@
     "build-ctp": "node-gyp rebuild",
     "build-copy": "cpx ./build/Release/*.node ./src/ && cpx ./scripts/ctp_data_type.js ./src/ && cpx ./scripts/ctp_struct.js ./src/",
     "build": "npm run build-ctp && npm run build-copy"
+  },
+  "dependencies": {
+    "rxjs": "^6.3.3"
   }
 }
