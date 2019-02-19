@@ -1,4 +1,3 @@
-const EventEmitter = require('events').EventEmitter
 const Rx = require('rxjs')
 const { filter, first } = require('rxjs/operators')
 
@@ -9,7 +8,7 @@ exports.structDict = structDict
 exports.defineDict = defineDict
 exports.typedefDict = typedefDict
 
-const ctp = require(`./src/ctp_${process.platform}.node`)
+const ctp = require('./build/Release/ctp.node')
 
 ctp.createTrader = () => {
   const subject = new Rx.Subject()

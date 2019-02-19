@@ -1,6 +1,6 @@
 {
   "name": "snow-ctp",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "nodejs ctp wrapper",
   "main": "index.js",
   "repository": {
@@ -15,8 +15,6 @@
   "author": "wh1100717",
   "license": "MIT",
   "devDependencies": {
-    "cpx": "^1.5.0",
-    "cross-env": "^5.2.0",
     "eslint": "^5.6.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
@@ -27,9 +25,8 @@
   },
   "scripts": {
     "test": "node test.js",
-    "build-ctp": "node-gyp rebuild",
-    "build-copy": "cpx ./build/Release/*.node ./src/ && cpx ./scripts/ctp_data_type.js ./src/ && cpx ./scripts/ctp_struct.js ./src/",
-    "build": "npm run build-ctp && npm run build-copy"
+    "build": "node-gyp rebuild",
+    "install": "npm run build"
   },
   "dependencies": {
     "rxjs": "^6.3.3"

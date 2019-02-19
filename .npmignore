@@ -23,9 +23,4 @@ persist
 htmlcov
 .coverage
 dump.rdb
-
-binding.gyp
-cpp
 deps
-lib
-scripts

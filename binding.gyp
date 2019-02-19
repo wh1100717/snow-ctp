@@ -12,14 +12,14 @@
       "include_dirs": ["./lib/"],
       "conditions": [
         ['OS=="linux"', {
-          'target_name': 'ctp_linux',
+          'target_name': 'ctp',
           'libraries': [
             '$(CURDIR)/../lib/thosttraderapi.so',
             '$(CURDIR)/../lib/thostmduserapi.so'
           ]
         }],
         ['OS=="win"', {
-          'target_name': 'ctp_win32',
+          'target_name': 'ctp',
           'libraries': [
             "../lib/thosttraderapi.lib",
             '../lib/thostmduserapi.lib'
