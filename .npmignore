@@ -24,3 +24,4 @@ htmlcov
 .coverage
 dump.rdb
 deps
+lib/docs
