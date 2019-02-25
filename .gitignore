@@ -23,6 +23,7 @@ persist
 htmlcov
 .coverage
 dump.rdb
+lib/*.node
 
 # Include CTP DLLs && libs
 !/lib/*.dll
