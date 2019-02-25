@@ -8,7 +8,7 @@ exports.structDict = structDict
 exports.defineDict = defineDict
 exports.typedefDict = typedefDict
 
-const ctp = require('./build/Release/ctp.node')
+const ctp = require('./lib/ctp.node')
 
 ctp.createTrader = () => {
   const subject = new Rx.Subject()
